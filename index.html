@@ -14,7 +14,7 @@ const CONFIG = {
   subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
   accent: "#4F46E5",
   team: "우리가 가나다 팀",
-  bgImage: "background.jpg" // 이미지 파일명 기입
+  bgImage: "background.jpg" 
 };
 </script>
 <style>
@@ -30,6 +30,8 @@ const CONFIG = {
     align-items: center; 
     justify-content: center; 
     padding: 24px 16px;
+    position: relative; /* 이스터에그 터치 영역 배치용 */
+    overflow-x: hidden;
     
     /* 배경 이미지 설정 */
     background-image: url('background.jpg'); 
@@ -53,6 +55,7 @@ const CONFIG = {
     width: 100%; 
     max-width: 440px; 
     text-align: center; 
+    z-index: 2; /* 이스터에그 영역보다 카드가 항상 위에 오도록 설정 */
   }
   
   #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
@@ -65,12 +68,66 @@ const CONFIG = {
   #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
 
   .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
-  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; }
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } /* 포지션 relative 지정 */
   .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
-  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   .flag-cloth.up { top: 5px; }
   .flag-cloth.blue { background: #3B82F6; color: white; }
   .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+
+  /* 🥚 이스터에그 팝업 텍스트 스타일 */
+  .egg-popup {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0);
+    font-size: 34px;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.25);
+  }
+  #egg-blue { color: #1E40AF; } /* 깊고 강렬한 파란색 */
+  #egg-white { color: #EA580C; } /* 황동색 징 느낌의 주황색 */
+
+  /* 글자 통통 튀어오르는 애니메이션 */
+  .egg-popup.show {
+    animation: bounce-up 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes bounce-up {
+    0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
+    30% { transform: translate(-50%, -60px) scale(1.4); opacity: 1; }
+    80% { transform: translate(-50%, -85px) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
+  }
+
+  /* 🥚 이스터에그 보이지 않는 클릭 존 (좌우 하단 배치) */
+  .hotspot {
+    position: fixed;
+    bottom: 10%;
+    width: 16vw;
+    height: 16vw;
+    min-width: 110px;
+    min-height: 110px;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0); /* 완전 투명 */
+    transition: background 0.2s, transform 0.1s;
+  }
+  /* 마우스를 올리면 이스터에그 힌트가 슬쩍 보이도록 아주 옅게 설정 */
+  .hotspot:hover {
+    background: rgba(255, 223, 0, 0.04);
+    box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
+  }
+  .hotspot:active {
+    transform: scale(0.9);
+  }
+  #hotspot-drum { left: 5%; }  /* 일러스트상 파란 북 근처 */
+  #hotspot-gong { right: 5%; } /* 일러스트상 징 근처 */
 
   .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .control-col { display: flex; flex-direction: column; gap: 8px; }
@@ -94,6 +151,9 @@ const CONFIG = {
 </style>
 </head>
 <body>
+  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+
   <h1 id="title"></h1>
   <p class="subtitle" id="subtitle"></p>
 
@@ -108,12 +168,14 @@ const CONFIG = {
 
     <div class="flag-container">
       <div class="flag-pole-wrapper">
+        <div id="egg-blue" class="egg-popup">북</div>
         <div class="flag-pole">
           <div id="flagBlue" class="flag-cloth blue">청기</div>
         </div>
         <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
       </div>
       <div class="flag-pole-wrapper">
+        <div id="egg-white" class="egg-popup">징</div>
         <div class="flag-pole">
           <div id="flagWhite" class="flag-cloth white">백기</div>
         </div>
@@ -165,7 +227,7 @@ const CONFIG = {
   const timerProgress = document.getElementById("timerProgress");
   const heartBox = document.getElementById("heartBox");
   
-  const KEY = "rank_flag_game_v5"; // 로컬스토리지 키 분리
+  const KEY = "rank_flag_game_v6"; // 로컬스토리지 키 분리
   
   // 게임 제어 변수들
   let state = "idle";
@@ -192,6 +254,25 @@ const CONFIG = {
     { text: "청기 내리고 백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
     { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
   ];
+
+  // 🥚 이스터에그 전용 제어 함수
+  function playEasterEgg(side, text) {
+    const eggText = document.getElementById(`egg-${side}`);
+    eggText.textContent = text;
+    
+    // 애니메이션 초기화 후 재생
+    eggText.classList.remove("show");
+    void eggText.offsetWidth; // 브라우저가 다시 그리도록 강제 유도(reflow)
+    eggText.classList.add("show");
+
+    // 보너스 피드백: 깃발 흔들림 주기
+    const flagId = side === "blue" ? "flagBlue" : "flagWhite";
+    const flagEl = document.getElementById(flagId);
+    flagEl.style.transform = "scale(1.2) rotate(15deg)";
+    setTimeout(() => {
+      flagEl.style.transform = "";
+    }, 150);
+  }
 
   // 하트 렌더링 동기화 함수
   function updateHeartGraphics() {
@@ -225,7 +306,7 @@ const CONFIG = {
     updateFlagGraphics();
   }
 
-  // ★ 공통 게임 시작/재시작 제어 함수로 분리 ★
+  // 공통 게임 시작/재시작 제어 함수
   function triggerGameStart() {
     score = 0;
     lives = 3; 
@@ -242,15 +323,13 @@ const CONFIG = {
     nextRound();
   }
 
-  // 키보드 통합 바인딩 이벤트 (스페이스바 시작 포함)
+  // 키보드 통합 바인딩 이벤트
   window.addEventListener("keydown", (e) => {
-    // [예외 처리] 명예의 전당 이름 입력 필드 활성화 시 단축키 차단
     if (document.activeElement.tagName === "INPUT") return;
 
-    // 대기 또는 게임오버 화면에서 스페이스바를 누르면 시작
     if (e.key === " ") {
       if (state === "idle" || state === "done") {
-        e.preventDefault(); // 스페이스바 스크롤 현상 방지
+        e.preventDefault(); 
         triggerGameStart();
         return;
       }
@@ -258,7 +337,6 @@ const CONFIG = {
 
     if (state !== "playing") return;
     
-    // 조작 키 바인딩
     if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
     if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
     
