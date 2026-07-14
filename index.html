@@ -10,7 +10,7 @@
    bgImage: 다운로드한 배경 이미지 파일명 (같은 폴더에 두세요)
    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
 const CONFIG = {
-  title: "청기백기",
+  title: "천하제일 청기백기",
   subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
   accent: "#4F46E5",
   team: "우리가 가나다 팀",
@@ -28,25 +28,23 @@ const CONFIG = {
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    justify-content: center; /* 세로 중앙 정렬 */
+    justify-content: center; 
     padding: 24px 16px;
     
-    /* ★ 배경 이미지 설정 ★ */
-    background-image: url('background.jpg'); /* CONFIG.bgImage와 연동 */
+    /* 배경 이미지 설정 */
+    background-image: url('background.jpg'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
 
-  /* 타이틀과 서브타이틀은 배경 위에서 잘 보이도록 그림자 효과 부여 */
   h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; }
   .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
   
-  /* 게임 메인 카드 (가운데 투명 영역에 배치되며 뒷배경이 은은하게 비침) */
   .card { 
     background: var(--card); 
-    backdrop-filter: blur(6px); /* 고급스러운 흐림 효과 */
+    backdrop-filter: blur(6px); 
     -webkit-backdrop-filter: blur(6px);
     border-radius: 20px; 
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -57,19 +55,15 @@ const CONFIG = {
     text-align: center; 
   }
   
-  /* 하트 상태창 스타일 */
   #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
 
-  /* 아레나(명령창) 스타일 */
-  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); }
+  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); }
   #arena.wait { background: #E05B5B; }
   #arena.go { background: #27B85B; }
 
-  /* 타이머 게이지 바 */
   #timerBar { width: 100%; height: 8px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
   #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
 
-  /* 비주얼 깃발 그래픽 영역 */
   .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
   .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; }
   .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
@@ -78,7 +72,6 @@ const CONFIG = {
   .flag-cloth.blue { background: #3B82F6; color: white; }
   .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
 
-  /* 컨트롤 그리드 (버튼 조작) */
   .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .control-col { display: flex; flex-direction: column; gap: 8px; }
   .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -107,7 +100,7 @@ const CONFIG = {
   <div class="card">
     <div id="heartBox">❤️❤️❤️</div>
 
-    <div id="arena">클릭해서 게임 시작</div>
+    <div id="arena">클릭 또는 스페이스바를 눌러 시작</div>
     
     <div id="timerBar">
       <div id="timerProgress"></div>
@@ -144,7 +137,7 @@ const CONFIG = {
       <input id="name" placeholder="이름 입력" maxlength="8">
       <button class="save-btn" onclick="saveScore()">랭킹 등록</button>
     </div>
-    <p class="hint">라이프가 0이 되기 전까지 가장 많은 명령을 수행하세요!</p>
+    <p class="hint">스페이스바를 눌러 게임을 시작하고 빠르게 대처하세요!</p>
   </div>
 
   <div class="card" id="rankCard">
@@ -172,7 +165,7 @@ const CONFIG = {
   const timerProgress = document.getElementById("timerProgress");
   const heartBox = document.getElementById("heartBox");
   
-  const KEY = "rank_flag_game_v4"; // 로컬스토리지 키 분리
+  const KEY = "rank_flag_game_v5"; // 로컬스토리지 키 분리
   
   // 게임 제어 변수들
   let state = "idle";
@@ -232,10 +225,40 @@ const CONFIG = {
     updateFlagGraphics();
   }
 
-  // 키보드 바인딩 이벤트
+  // ★ 공통 게임 시작/재시작 제어 함수로 분리 ★
+  function triggerGameStart() {
+    score = 0;
+    lives = 3; 
+    limitTime = initialLimitTime;
+    flags = { blue: "down", white: "down" };
+    updateFlagGraphics();
+    updateHeartGraphics();
+    
+    result.textContent = "";
+    saveBox.style.display = "none";
+    timerBar.style.display = "block";
+    heartBox.style.display = "block";
+    
+    nextRound();
+  }
+
+  // 키보드 통합 바인딩 이벤트 (스페이스바 시작 포함)
   window.addEventListener("keydown", (e) => {
+    // [예외 처리] 명예의 전당 이름 입력 필드 활성화 시 단축키 차단
+    if (document.activeElement.tagName === "INPUT") return;
+
+    // 대기 또는 게임오버 화면에서 스페이스바를 누르면 시작
+    if (e.key === " ") {
+      if (state === "idle" || state === "done") {
+        e.preventDefault(); // 스페이스바 스크롤 현상 방지
+        triggerGameStart();
+        return;
+      }
+    }
+
     if (state !== "playing") return;
     
+    // 조작 키 바인딩
     if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
     if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
     
@@ -270,19 +293,7 @@ const CONFIG = {
   // 아레나 클릭 시 시작/재시작 핸들러
   arena.addEventListener("click", () => {
     if (state === "idle" || state === "done") {
-      score = 0;
-      lives = 3; 
-      limitTime = initialLimitTime;
-      flags = { blue: "down", white: "down" };
-      updateFlagGraphics();
-      updateHeartGraphics();
-      
-      result.textContent = "";
-      saveBox.style.display = "none";
-      timerBar.style.display = "block";
-      heartBox.style.display = "block";
-      
-      nextRound();
+      triggerGameStart();
     }
   });
 
@@ -334,7 +345,7 @@ const CONFIG = {
         state = "done";
         timerBar.style.display = "none";
         arena.className = "wait";
-        arena.textContent = "게임 오버! 다시 하려면 클릭";
+        arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
         result.textContent = `최종 점수: ${score}회 성공`;
         
         lastScore = score;
