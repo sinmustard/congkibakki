@@ -75,7 +75,7 @@ const CONFIG = {
   .flag-cloth.blue { background: #3B82F6; color: white; }
   .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
 
-  /* 🥚 이스터에그 팝업 텍스트 스타일 */
+  /* 🥚 징/북 이스터에그 팝업 텍스트 스타일 */
   .egg-popup {
     position: absolute;
     top: 10px;
@@ -102,6 +102,42 @@ const CONFIG = {
     100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
   }
 
+  /* ⚡ [NEW] 스피드 조 중앙 알림 이스터에그 스타일 */
+  .speed-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(0, 0, 0, 0.9);
+    color: #FFDD00; /* 다급한 노란색 */
+    padding: 22px 36px;
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 900;
+    z-index: 9999; /* 화면 최상단에 배치 */
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 221, 0, 0.5);
+    border: 3px solid #FFDD00;
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .speed-popup.show {
+    animation: speed-pop-shake 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  /* 스피드함을 강조하는 덜덜덜덜 진동+크기 애니메이션 */
+  @keyframes speed-pop-shake {
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
+    15% { transform: translate(-50%, -50%) scale(1.0) rotate(3deg); }
+    20% { transform: translate(-50%, -50%) scale(1.05) rotate(-2deg); }
+    25% { transform: translate(-50%, -50%) scale(1.0) rotate(2deg); }
+    30% { transform: translate(-50%, -50%) scale(1.0) rotate(-1deg); }
+    80% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
   /* 🥚 이스터에그 보이지 않는 클릭 존 (좌우 하단 배치) */
   .hotspot {
     position: fixed;
@@ -118,7 +154,6 @@ const CONFIG = {
     background: rgba(255, 255, 255, 0); /* 완전 투명 */
     transition: background 0.2s, transform 0.1s;
   }
-  /* 마우스를 올리면 이스터에그 힌트가 슬쩍 보이도록 아주 옅게 설정 */
   .hotspot:hover {
     background: rgba(255, 223, 0, 0.04);
     box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
@@ -126,8 +161,8 @@ const CONFIG = {
   .hotspot:active {
     transform: scale(0.9);
   }
-  #hotspot-drum { left: 5%; }  /* 일러스트상 파란 북 근처 */
-  #hotspot-gong { right: 5%; } /* 일러스트상 징 근처 */
+  #hotspot-drum { left: 5%; }  
+  #hotspot-gong { right: 5%; } 
 
   .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .control-col { display: flex; flex-direction: column; gap: 8px; }
@@ -147,12 +182,18 @@ const CONFIG = {
   ol { text-align: left; padding-left: 26px; }
   li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
   li b { color: var(--accent); }
+  
+  /* 푸터 텍스트에 호버 힌트 추가 */
   footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+  footer span { transition: color 0.2s, text-shadow 0.2s; }
+  footer span:hover { color: #EF4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
 </style>
 </head>
 <body>
   <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
   <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+
+  <div id="speed-popup" class="speed-popup">진행자가 속도를 원하고 있어 ⚡🏃‍♂️</div>
 
   <h1 id="title"></h1>
   <p class="subtitle" id="subtitle"></p>
@@ -214,7 +255,9 @@ const CONFIG = {
   document.documentElement.style.setProperty("--accent", CONFIG.accent);
   document.getElementById("title").textContent = CONFIG.title;
   document.getElementById("subtitle").textContent = CONFIG.subtitle;
-  document.getElementById("footer").textContent = CONFIG.team + " 제작 · 개발자 체험 캠프";
+  
+  // ⚡ 푸터의 팀 이름 부분에 클릭 이벤트용 태그 감싸기
+  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer; text-decoration: underline; text-underline-offset: 4px;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
   document.title = CONFIG.title;
   
   // 동적 배경 이미지 적용
@@ -255,7 +298,15 @@ const CONFIG = {
     { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
   ];
 
-  // 🥚 이스터에그 전용 제어 함수
+  // 🥚 [NEW] 스피드 조 클릭 시 정가운데 알림 재생
+  document.getElementById("team-click").addEventListener("click", () => {
+    const speedPopup = document.getElementById("speed-popup");
+    speedPopup.classList.remove("show");
+    void speedPopup.offsetWidth; // reflow
+    speedPopup.classList.add("show");
+  });
+
+  // 🥚 징/북 이스터에그 전용 제어 함수
   function playEasterEgg(side, text) {
     const eggText = document.getElementById(`egg-${side}`);
     eggText.textContent = text;
