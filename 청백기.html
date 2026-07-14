@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>청기백기 게임</title>
+<script>
+/* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   미션 1 — 아래 값을 바꾸면 우리 팀 게임이 됩니다!
+   title: 게임 제목 / subtitle: 한 줄 소개
+   accent: 우리 팀 색 (예: 파랑 #3B82F6, 초록 #27B85B, 보라 #8B5CF6)
+   team: 팀 이름
+   ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
+const CONFIG = {
+  title: "번개 청기백기 테스트",
+  subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
+  accent: "#4F46E5",
+  team: "0팀",
+};
+</script>
+<style>
+  :root { --accent: #4F46E5; --ink: #22335C; --sub: #6B7690; --bg: #FAF8F2; --card: #FFFFFF; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+  h1 { font-size: 30px; margin-top: 8px; }
+  .subtitle { color: var(--sub); margin: 6px 0 20px; }
+  .card { background: var(--card); border-radius: 16px; box-shadow: 0 4px 16px rgba(34,51,92,.08); padding: 24px; width: 100%; max-width: 460px; text-align: center; }
+  
+  /* 하트 상태창 스타일 */
+  #heartBox { font-size: 22px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
+
+  /* 아레나(명령창) 스타일 */
+  #arena { height: 120px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; }
+  #arena.wait { background: #E05B5B; }
+  #arena.go { background: #27B85B; }
+
+  /* 타이머 게이지 바 */
+  #timerBar { width: 100%; height: 8px; background: #E5E0D4; border-radius: 4px; margin-top: 10px; overflow: hidden; display: none; }
+  #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
+
+  /* 비주얼 깃발 그래픽 영역 */
+  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: #F1ECE1; border-radius: 12px; padding: 10px; }
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; }
+  .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
+  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .flag-cloth.up { top: 5px; }
+  .flag-cloth.blue { background: #3B82F6; color: white; }
+  .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+
+  /* 컨트롤 그리드 (버튼 조작) */
+  .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .control-col { display: flex; flex-direction: column; gap: 8px; }
+  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; }
+  .control-btn:active { transform: scale(0.95); }
+  .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-blue { background: #3B82F6; color: white; }
+  .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+  .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+
+  .big { font-size: 32px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
+  .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
+  input { padding: 10px 12px; border: 2px solid #E5E0D4; border-radius: 10px; font-size: 15px; width: 55%; margin-right: 6px; }
+  button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; }
+  #rankCard { margin-top: 18px; }
+  h2 { font-size: 17px; margin-bottom: 10px; }
+  ol { text-align: left; padding-left: 26px; }
+  li { padding: 5px 0; border-bottom: 1px dashed #EEE8DA; }
+  li b { color: var(--accent); }
+  footer { margin-top: 22px; color: var(--sub); font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="card">
+    <div id="heartBox">❤️❤️❤️</div>
+
+    <div id="arena">클릭해서 게임 시작</div>
+    
+    <div id="timerBar">
+      <div id="timerProgress"></div>
+    </div>
+
+    <div class="flag-container">
+      <div class="flag-pole-wrapper">
+        <div class="flag-pole">
+          <div id="flagBlue" class="flag-cloth blue">청기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
+      </div>
+      <div class="flag-pole-wrapper">
+        <div class="flag-pole">
+          <div id="flagWhite" class="flag-cloth white">백기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 (▲ / ▼)</div>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <div class="control-col">
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'up')">🔵 청기 올려<span class="key-hint">W 키</span></button>
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
+      </div>
+      <div class="control-col">
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">▲ 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">▼ 키</span></button>
+      </div>
+    </div>
+
+    <div class="big" id="result"></div>
+    <div id="saveBox" style="display:none">
+      <input id="name" placeholder="이름 입력" maxlength="8">
+      <button class="save-btn" onclick="saveScore()">랭킹 등록</button>
+    </div>
+    <p class="hint">라이프가 0이 되기 전까지 가장 많은 명령을 수행하세요!</p>
+  </div>
+
+  <div class="card" id="rankCard">
+    <h2>🏆 명예의 전당 (성공 횟수 TOP 5)</h2>
+    <ol id="rank"></ol>
+  </div>
+
+  <footer id="footer"></footer>
+
+<script>
+  // ---- CONFIG 적용 ----
+  document.documentElement.style.setProperty("--accent", CONFIG.accent);
+  document.getElementById("title").textContent = CONFIG.title;
+  document.getElementById("subtitle").textContent = CONFIG.subtitle;
+  document.getElementById("footer").textContent = CONFIG.team + " 제작 · 개발자 체험 캠프";
+  document.title = CONFIG.title;
+
+  const arena = document.getElementById("arena");
+  const result = document.getElementById("result");
+  const saveBox = document.getElementById("saveBox");
+  const timerBar = document.getElementById("timerBar");
+  const timerProgress = document.getElementById("timerProgress");
+  const heartBox = document.getElementById("heartBox");
+  
+  const KEY = "rank_flag_game_v3"; // localStorage 키
+  
+  // 게임 제어 변수들
+  let state = "idle";
+  let score = 0;
+  let lastScore = 0;
+  let lives = 3; // 맥스 하트 수 지정
+  
+  // 깃발 상태 변수 ("up" 또는 "down")
+  let flags = { blue: "down", white: "down" };
+
+  let currentCommand = null;
+  let initialLimitTime = 2500; // 첫 라운드 제한시간 (2.5초)
+  let limitTime = 2500;
+  let timeLeft = 0;
+  let lastFrameTime = 0;
+  let animationFrameId = null;
+
+  // 절대 목적 상태 검증 데이터셋
+  const COMMANDS = [
+    { text: "청기 올려!", check: (f) => f.blue === "up" && f.white === "down" },
+    { text: "백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "둘 다 올려!", check: (f) => f.blue === "up" && f.white === "up" },
+    { text: "둘 다 내려!", check: (f) => f.blue === "down" && f.white === "down" },
+    { text: "청기 내리고 백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
+  ];
+
+  // 하트 렌더링 동기화 함수
+  function updateHeartGraphics() {
+    heartBox.textContent = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
+  }
+
+  // UI 버튼 비활성화 제어 함수
+  function setButtonsDisabled(disabled) {
+    document.querySelectorAll(".control-btn").forEach(btn => btn.disabled = disabled);
+  }
+
+  // 초기 버튼 상태 비활성화
+  setButtonsDisabled(true);
+
+  // 깃발 그래픽 갱신
+  function updateFlagGraphics() {
+    const flagBlue = document.getElementById("flagBlue");
+    const flagWhite = document.getElementById("flagWhite");
+
+    if (flags.blue === "up") flagBlue.classList.add("up");
+    else flagBlue.classList.remove("up");
+
+    if (flags.white === "up") flagWhite.classList.add("up");
+    else flagWhite.classList.remove("up");
+  }
+
+  // 깃발 조작 이벤트
+  function controlFlag(color, action) {
+    if (state !== "playing") return;
+    flags[color] = action;
+    updateFlagGraphics();
+  }
+
+  // 키보드 바인딩 이벤트
+  window.addEventListener("keydown", (e) => {
+    if (state !== "playing") return;
+    
+    if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
+    if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
+    
+    if (e.key === "ArrowUp") {
+      e.preventDefault(); 
+      controlFlag("white", "up");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      controlFlag("white", "down");
+    }
+  });
+
+  // 게임 메인 프레임 루프 (타이머 바 동기화)
+  function gameLoop(now) {
+    if (state !== "playing") return;
+
+    const dt = now - lastFrameTime;
+    lastFrameTime = now;
+    timeLeft -= dt;
+
+    const percent = Math.max(0, (timeLeft / limitTime) * 100);
+    timerProgress.style.width = percent + "%";
+
+    if (timeLeft <= 0) {
+      evaluateRound();
+    } else {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // 아레나 클릭 시 시작/재시작 핸들러
+  arena.addEventListener("click", () => {
+    if (state === "idle" || state === "done") {
+      score = 0;
+      lives = 3; // 라이프 리셋
+      limitTime = initialLimitTime;
+      flags = { blue: "down", white: "down" };
+      updateFlagGraphics();
+      updateHeartGraphics();
+      
+      result.textContent = "";
+      saveBox.style.display = "none";
+      timerBar.style.display = "block";
+      heartBox.style.display = "block";
+      
+      nextRound();
+    }
+  });
+
+  // 다음 라운드 진행
+  function nextRound() {
+    state = "playing";
+    arena.className = "";
+    setButtonsDisabled(false);
+    
+    currentCommand = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
+    arena.textContent = currentCommand.text;
+
+    timeLeft = limitTime;
+    lastFrameTime = performance.now();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // 매 라운드 판정 함수 (★ 하트 차감 로직 추가 ★)
+  function evaluateRound() {
+    cancelAnimationFrame(animationFrameId);
+    setButtonsDisabled(true);
+
+    const isCorrect = currentCommand.check(flags);
+
+    if (isCorrect) {
+      // 1. 성공한 경우
+      score++;
+      state = "feedback";
+      arena.className = "go";
+      arena.textContent = "성공! 🎉";
+      result.textContent = score + " 회 돌파!";
+      
+      setTimeout(() => {
+        limitTime = Math.max(800, limitTime - 120); // 속도 증가폭 완화 (하트 분량 고려)
+        nextRound();
+      }, 600);
+    } else {
+      // 2. 틀렸거나 시간 초과인 경우
+      lives--;
+      updateHeartGraphics();
+
+      if (lives > 0) {
+        // 아직 목숨이 남음 -> 경고 피드백 후 다음 라운드로 토스
+        state = "feedback";
+        arena.className = "wait";
+        arena.textContent = "아차! 기회 감점! 😢";
+        
+        setTimeout(() => {
+          nextRound();
+        }, 800);
+      } else {
+        // 완전히 아웃 -> 게임오버 처리
+        state = "done";
+        timerBar.style.display = "none";
+        arena.className = "wait";
+        arena.textContent = "게임 오버! 다시 하려면 클릭";
+        result.textContent = `최종 점수: ${score}회 성공`;
+        
+        lastScore = score;
+        saveBox.style.display = "block";
+      }
+    }
+  }
+
+  // ---- 랭킹 보드 로직 ----
+  function loadRank() { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+
+  function renderRank() {
+    const list = loadRank().sort((a, b) => b.score - a.score).slice(0, 5);
+    document.getElementById("rank").innerHTML =
+      list.length ? list.map(r => `<li><b>${r.score} 회 성공</b> — ${r.name}</li>`).join("")
+                  : "<li>아직 기록이 없어요. 1등에 도전!</li>";
+  }
+
+  function saveScore() {
+    const name = document.getElementById("name").value.trim() || "익명";
+    const list = loadRank();
+    list.push({ name, score: lastScore, at: Date.now() });
+    localStorage.setItem(KEY, JSON.stringify(list));
+    
+    saveBox.style.display = "none";
+    document.getElementById("name").value = "";
+    renderRank();
+  }
+
+  renderRank();
+</script>
+</body>
+</html>
