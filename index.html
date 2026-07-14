@@ -7,39 +7,70 @@
 <script>
 /* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
    미션 1 — 아래 값을 바꾸면 우리 팀 게임이 됩니다!
-   title: 게임 제목 / subtitle: 한 줄 소개
-   accent: 우리 팀 색 (예: 파랑 #3B82F6, 초록 #27B85B, 보라 #8B5CF6)
-   team: 팀 이름
+   bgImage: 다운로드한 배경 이미지 파일명 (같은 폴더에 두세요)
    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
 const CONFIG = {
-  title: "번개 청기백기 테스트",
+  title: "청기백기",
   subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
   accent: "#4F46E5",
-  team: "0팀",
+  team: "우리가 가나다 팀",
+  bgImage: "background.jpg" // 이미지 파일명 기입
 };
 </script>
 <style>
-  :root { --accent: #4F46E5; --ink: #22335C; --sub: #6B7690; --bg: #FAF8F2; --card: #FFFFFF; }
+  :root { --accent: #4F46E5; --ink: #22335C; --sub: #6B7690; --bg: #FAF8F2; --card: rgba(255, 255, 255, 0.88); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
-  h1 { font-size: 30px; margin-top: 8px; }
-  .subtitle { color: var(--sub); margin: 6px 0 20px; }
-  .card { background: var(--card); border-radius: 16px; box-shadow: 0 4px 16px rgba(34,51,92,.08); padding: 24px; width: 100%; max-width: 460px; text-align: center; }
+  
+  body { 
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; 
+    color: var(--ink); 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; /* 세로 중앙 정렬 */
+    padding: 24px 16px;
+    
+    /* ★ 배경 이미지 설정 ★ */
+    background-image: url('background.jpg'); /* CONFIG.bgImage와 연동 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* 타이틀과 서브타이틀은 배경 위에서 잘 보이도록 그림자 효과 부여 */
+  h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; }
+  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+  
+  /* 게임 메인 카드 (가운데 투명 영역에 배치되며 뒷배경이 은은하게 비침) */
+  .card { 
+    background: var(--card); 
+    backdrop-filter: blur(6px); /* 고급스러운 흐림 효과 */
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    padding: 24px; 
+    width: 100%; 
+    max-width: 440px; 
+    text-align: center; 
+  }
   
   /* 하트 상태창 스타일 */
-  #heartBox { font-size: 22px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
+  #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
 
   /* 아레나(명령창) 스타일 */
-  #arena { height: 120px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; }
+  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); }
   #arena.wait { background: #E05B5B; }
   #arena.go { background: #27B85B; }
 
   /* 타이머 게이지 바 */
-  #timerBar { width: 100%; height: 8px; background: #E5E0D4; border-radius: 4px; margin-top: 10px; overflow: hidden; display: none; }
+  #timerBar { width: 100%; height: 8px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
   #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
 
   /* 비주얼 깃발 그래픽 영역 */
-  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: #F1ECE1; border-radius: 12px; padding: 10px; }
+  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
   .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; }
   .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
   .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -50,23 +81,23 @@ const CONFIG = {
   /* 컨트롤 그리드 (버튼 조작) */
   .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .control-col { display: flex; flex-direction: column; gap: 8px; }
-  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; }
+  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .control-btn:active { transform: scale(0.95); }
   .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-blue { background: #3B82F6; color: white; }
   .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
   .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
 
-  .big { font-size: 32px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
+  .big { font-size: 28px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
   .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
-  input { padding: 10px 12px; border: 2px solid #E5E0D4; border-radius: 10px; font-size: 15px; width: 55%; margin-right: 6px; }
+  input { padding: 10px 12px; border: 2px solid #E5E0D4; border-radius: 10px; font-size: 15px; width: 55%; margin-right: 6px; background: rgba(255,255,255,0.9); }
   button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; }
   #rankCard { margin-top: 18px; }
   h2 { font-size: 17px; margin-bottom: 10px; }
   ol { text-align: left; padding-left: 26px; }
-  li { padding: 5px 0; border-bottom: 1px dashed #EEE8DA; }
+  li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
   li b { color: var(--accent); }
-  footer { margin-top: 22px; color: var(--sub); font-size: 12px; }
+  footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
 </style>
 </head>
 <body>
@@ -130,6 +161,9 @@ const CONFIG = {
   document.getElementById("subtitle").textContent = CONFIG.subtitle;
   document.getElementById("footer").textContent = CONFIG.team + " 제작 · 개발자 체험 캠프";
   document.title = CONFIG.title;
+  
+  // 동적 배경 이미지 적용
+  document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
 
   const arena = document.getElementById("arena");
   const result = document.getElementById("result");
@@ -138,19 +172,19 @@ const CONFIG = {
   const timerProgress = document.getElementById("timerProgress");
   const heartBox = document.getElementById("heartBox");
   
-  const KEY = "rank_flag_game_v3"; // localStorage 키
+  const KEY = "rank_flag_game_v4"; // 로컬스토리지 키 분리
   
   // 게임 제어 변수들
   let state = "idle";
   let score = 0;
   let lastScore = 0;
-  let lives = 3; // 맥스 하트 수 지정
+  let lives = 3; 
   
   // 깃발 상태 변수 ("up" 또는 "down")
   let flags = { blue: "down", white: "down" };
 
   let currentCommand = null;
-  let initialLimitTime = 2500; // 첫 라운드 제한시간 (2.5초)
+  let initialLimitTime = 2500; 
   let limitTime = 2500;
   let timeLeft = 0;
   let lastFrameTime = 0;
@@ -237,7 +271,7 @@ const CONFIG = {
   arena.addEventListener("click", () => {
     if (state === "idle" || state === "done") {
       score = 0;
-      lives = 3; // 라이프 리셋
+      lives = 3; 
       limitTime = initialLimitTime;
       flags = { blue: "down", white: "down" };
       updateFlagGraphics();
@@ -266,7 +300,7 @@ const CONFIG = {
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // 매 라운드 판정 함수 (★ 하트 차감 로직 추가 ★)
+  // 매 라운드 판정 함수
   function evaluateRound() {
     cancelAnimationFrame(animationFrameId);
     setButtonsDisabled(true);
@@ -274,7 +308,6 @@ const CONFIG = {
     const isCorrect = currentCommand.check(flags);
 
     if (isCorrect) {
-      // 1. 성공한 경우
       score++;
       state = "feedback";
       arena.className = "go";
@@ -282,16 +315,14 @@ const CONFIG = {
       result.textContent = score + " 회 돌파!";
       
       setTimeout(() => {
-        limitTime = Math.max(800, limitTime - 120); // 속도 증가폭 완화 (하트 분량 고려)
+        limitTime = Math.max(800, limitTime - 120); 
         nextRound();
       }, 600);
     } else {
-      // 2. 틀렸거나 시간 초과인 경우
       lives--;
       updateHeartGraphics();
 
       if (lives > 0) {
-        // 아직 목숨이 남음 -> 경고 피드백 후 다음 라운드로 토스
         state = "feedback";
         arena.className = "wait";
         arena.textContent = "아차! 기회 감점! 😢";
@@ -300,7 +331,6 @@ const CONFIG = {
           nextRound();
         }, 800);
       } else {
-        // 완전히 아웃 -> 게임오버 처리
         state = "done";
         timerBar.style.display = "none";
         arena.className = "wait";
