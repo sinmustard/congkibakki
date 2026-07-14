@@ -30,10 +30,9 @@ const CONFIG = {
     align-items: center; 
     justify-content: center; 
     padding: 24px 16px;
-    position: relative; /* 이스터에그 터치 영역 배치용 */
+    position: relative; 
     overflow-x: hidden;
     
-    /* 배경 이미지 설정 */
     background-image: url('background.jpg'); 
     background-size: cover;
     background-position: center;
@@ -55,7 +54,7 @@ const CONFIG = {
     width: 100%; 
     max-width: 440px; 
     text-align: center; 
-    z-index: 2; /* 이스터에그 영역보다 카드가 항상 위에 오도록 설정 */
+    z-index: 2; 
   }
   
   #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
@@ -68,7 +67,7 @@ const CONFIG = {
   #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
 
   .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
-  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } /* 포지션 relative 지정 */
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } 
   .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
   .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   .flag-cloth.up { top: 5px; }
@@ -88,10 +87,9 @@ const CONFIG = {
     opacity: 0;
     text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.25);
   }
-  #egg-blue { color: #1E40AF; } /* 깊고 강렬한 파란색 */
-  #egg-white { color: #EA580C; } /* 황동색 징 느낌의 주황색 */
+  #egg-blue { color: #1E40AF; } 
+  #egg-white { color: #EA580C; } 
 
-  /* 글자 통통 튀어오르는 애니메이션 */
   .egg-popup.show {
     animation: bounce-up 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
@@ -102,23 +100,23 @@ const CONFIG = {
     100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
   }
 
-  /* ⚡ [NEW] 스피드 조 중앙 알림 이스터에그 스타일 */
+  /* ⚡ 스피드 조 중앙 알림 이스터에그 스타일 (강렬한 레드 테마 유지) */
   .speed-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    background: rgba(0, 0, 0, 0.9);
-    color: #FFDD00; /* 다급한 노란색 */
+    background: rgba(0, 0, 0, 0.95);
+    color: #FF3B30; /* 강렬한 레드 컬러 유지 */
     padding: 22px 36px;
     border-radius: 16px;
     font-size: 26px;
     font-weight: 900;
-    z-index: 9999; /* 화면 최상단에 배치 */
+    z-index: 9999; 
     pointer-events: none;
     text-align: center;
-    box-shadow: 0 0 40px rgba(255, 221, 0, 0.5);
-    border: 3px solid #FFDD00;
+    box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
+    border: 3px solid #FF3B30; /* 테두리 레드 유지 */
     opacity: 0;
     white-space: nowrap;
   }
@@ -126,7 +124,6 @@ const CONFIG = {
     animation: speed-pop-shake 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
-  /* 스피드함을 강조하는 덜덜덜덜 진동+크기 애니메이션 */
   @keyframes speed-pop-shake {
     0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
     10% { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
@@ -151,7 +148,7 @@ const CONFIG = {
     border-radius: 50%;
     cursor: pointer;
     z-index: 1;
-    background: rgba(255, 255, 255, 0); /* 완전 투명 */
+    background: rgba(255, 255, 255, 0); 
     transition: background 0.2s, transform 0.1s;
   }
   .hotspot:hover {
@@ -183,7 +180,6 @@ const CONFIG = {
   li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
   li b { color: var(--accent); }
   
-  /* 푸터 텍스트에 호버 힌트 추가 */
   footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
   footer span { transition: color 0.2s, text-shadow 0.2s; }
   footer span:hover { color: #EF4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
@@ -193,7 +189,7 @@ const CONFIG = {
   <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
   <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
 
-  <div id="speed-popup" class="speed-popup">진행자가 속도를 원하고 있어 ⚡🏃‍♂️</div>
+  <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
 
   <h1 id="title"></h1>
   <p class="subtitle" id="subtitle"></p>
@@ -256,11 +252,9 @@ const CONFIG = {
   document.getElementById("title").textContent = CONFIG.title;
   document.getElementById("subtitle").textContent = CONFIG.subtitle;
   
-  // ⚡ 푸터의 팀 이름 부분에 클릭 이벤트용 태그 감싸기
-  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer; text-decoration: underline; text-underline-offset: 4px;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
+  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
   document.title = CONFIG.title;
   
-  // 동적 배경 이미지 적용
   document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
 
   const arena = document.getElementById("arena");
@@ -270,15 +264,13 @@ const CONFIG = {
   const timerProgress = document.getElementById("timerProgress");
   const heartBox = document.getElementById("heartBox");
   
-  const KEY = "rank_flag_game_v6"; // 로컬스토리지 키 분리
+  const KEY = "rank_flag_game_v6"; 
   
-  // 게임 제어 변수들
   let state = "idle";
   let score = 0;
   let lastScore = 0;
   let lives = 3; 
   
-  // 깃발 상태 변수 ("up" 또는 "down")
   let flags = { blue: "down", white: "down" };
 
   let currentCommand = null;
@@ -288,7 +280,8 @@ const CONFIG = {
   let lastFrameTime = 0;
   let animationFrameId = null;
 
-  // 절대 목적 상태 검증 데이터셋
+  let isSpeedMode = false;
+
   const COMMANDS = [
     { text: "청기 올려!", check: (f) => f.blue === "up" && f.white === "down" },
     { text: "백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
@@ -298,25 +291,28 @@ const CONFIG = {
     { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
   ];
 
-  // 🥚 [NEW] 스피드 조 클릭 시 정가운데 알림 재생
   document.getElementById("team-click").addEventListener("click", () => {
+    isSpeedMode = true; 
+
     const speedPopup = document.getElementById("speed-popup");
     speedPopup.classList.remove("show");
-    void speedPopup.offsetWidth; // reflow
+    void speedPopup.offsetWidth; 
     speedPopup.classList.add("show");
+
+    if (state === "playing") {
+      limitTime = limitTime / 2;
+      timeLeft = timeLeft / 2;
+    }
   });
 
-  // 🥚 징/북 이스터에그 전용 제어 함수
   function playEasterEgg(side, text) {
     const eggText = document.getElementById(`egg-${side}`);
     eggText.textContent = text;
     
-    // 애니메이션 초기화 후 재생
     eggText.classList.remove("show");
-    void eggText.offsetWidth; // 브라우저가 다시 그리도록 강제 유도(reflow)
+    void eggText.offsetWidth; 
     eggText.classList.add("show");
 
-    // 보너스 피드백: 깃발 흔들림 주기
     const flagId = side === "blue" ? "flagBlue" : "flagWhite";
     const flagEl = document.getElementById(flagId);
     flagEl.style.transform = "scale(1.2) rotate(15deg)";
@@ -325,20 +321,16 @@ const CONFIG = {
     }, 150);
   }
 
-  // 하트 렌더링 동기화 함수
   function updateHeartGraphics() {
     heartBox.textContent = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
   }
 
-  // UI 버튼 비활성화 제어 함수
   function setButtonsDisabled(disabled) {
     document.querySelectorAll(".control-btn").forEach(btn => btn.disabled = disabled);
   }
 
-  // 초기 버튼 상태 비활성화
   setButtonsDisabled(true);
 
-  // 깃발 그래픽 갱신
   function updateFlagGraphics() {
     const flagBlue = document.getElementById("flagBlue");
     const flagWhite = document.getElementById("flagWhite");
@@ -350,18 +342,18 @@ const CONFIG = {
     else flagWhite.classList.remove("up");
   }
 
-  // 깃발 조작 이벤트
   function controlFlag(color, action) {
     if (state !== "playing") return;
     flags[color] = action;
     updateFlagGraphics();
   }
 
-  // 공통 게임 시작/재시작 제어 함수
   function triggerGameStart() {
     score = 0;
     lives = 3; 
-    limitTime = initialLimitTime;
+    
+    limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+    
     flags = { blue: "down", white: "down" };
     updateFlagGraphics();
     updateHeartGraphics();
@@ -374,7 +366,6 @@ const CONFIG = {
     nextRound();
   }
 
-  // 키보드 통합 바인딩 이벤트
   window.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === "INPUT") return;
 
@@ -401,7 +392,6 @@ const CONFIG = {
     }
   });
 
-  // 게임 메인 프레임 루프 (타이머 바 동기화)
   function gameLoop(now) {
     if (state !== "playing") return;
 
@@ -419,14 +409,12 @@ const CONFIG = {
     }
   }
 
-  // 아레나 클릭 시 시작/재시작 핸들러
   arena.addEventListener("click", () => {
     if (state === "idle" || state === "done") {
       triggerGameStart();
     }
   });
 
-  // 다음 라운드 진행
   function nextRound() {
     state = "playing";
     arena.className = "";
@@ -440,7 +428,6 @@ const CONFIG = {
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // 매 라운드 판정 함수
   function evaluateRound() {
     cancelAnimationFrame(animationFrameId);
     setButtonsDisabled(true);
@@ -455,7 +442,8 @@ const CONFIG = {
       result.textContent = score + " 회 돌파!";
       
       setTimeout(() => {
-        limitTime = Math.max(800, limitTime - 120); 
+        const minTime = isSpeedMode ? 400 : 800;
+        limitTime = Math.max(minTime, limitTime - 120); 
         nextRound();
       }, 600);
     } else {
@@ -479,11 +467,12 @@ const CONFIG = {
         
         lastScore = score;
         saveBox.style.display = "block";
+        
+        isSpeedMode = false;
       }
     }
   }
 
-  // ---- 랭킹 보드 로직 ----
   function loadRank() { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
 
   function renderRank() {
