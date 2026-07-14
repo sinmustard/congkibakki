@@ -16,7 +16,7 @@ const CONFIG = {
   team: "우리가 스피드 조",
   bgImage: "background.jpg",
   
-  // ⚡ 제공해주신 진짜 URL과 eyJ... 공개 API 키로 완벽 교체되었습니다!
+  // ⚡ 제공해주신 URL과 eyJ... 공개 API 키가 완벽하게 세팅되었습니다.
   supabaseUrl: "https://oijsrlbzxowlaxzmsxpt.supabase.co",
   supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9panNybGJ6eG93bGF4em1zeHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMTYwMTUsImV4cCI6MjA5OTU5MjAxNX0.76pOHZIZQnJfIvwJOGBy49xbL4loAmKBJYQcV9SSo4U"
 };
@@ -79,7 +79,6 @@ const CONFIG = {
   .flag-cloth.blue { background: #3B82F6; color: white; }
   .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
 
-  /* 🥚 징/북 이스터에그 팝업 텍스트 스타일 */
   .egg-popup {
     position: absolute;
     top: 10px;
@@ -105,7 +104,6 @@ const CONFIG = {
     100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
   }
 
-  /* ⚡ "속도를 원하는 구나?" 이스터에그 팝업 */
   .speed-popup {
     position: fixed;
     top: 50%;
@@ -140,7 +138,6 @@ const CONFIG = {
     100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
   }
 
-  /* 🥚 이스터에그 클릭 감지 스팟 */
   .hotspot {
     position: fixed;
     bottom: 10%;
@@ -218,7 +215,7 @@ const CONFIG = {
 </head>
 <body>
   <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
-  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="pushEasterEgg('white', '징🔔')"></div>
 
   <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
 
@@ -519,7 +516,7 @@ const CONFIG = {
     }
   }
 
-  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (records 테이블 반영)
+  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (실제 대시보드의 rankings 테이블로 고정)
   async function renderRank() {
     const rankList = document.getElementById("rank");
     
@@ -530,7 +527,7 @@ const CONFIG = {
 
     try {
       const { data, error } = await supabaseClient
-        .from('records') // ➡️ rankings에서 records 테이블 명으로 변경 완료!
+        .from('rankings') // ➡️ 선배님의 테이블 이름인 'rankings'로 정렬!
         .select('name, score')
         .order('score', { ascending: false })
         .limit(5);
@@ -542,11 +539,11 @@ const CONFIG = {
         : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
     } catch (err) {
       console.error("랭킹 불러오기 실패:", err);
-      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패 (Supabase 설정을 확인해주세요)</li>";
+      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패 (SQL Editor 자물쇠를 해제해 주세요)</li>";
     }
   }
 
-  // ⚡ [Supabase API] 신규 랭킹 등록 (records 테이블 반영)
+  // ⚡ [Supabase API] 신규 랭킹 등록 (실제 대시보드의 rankings 테이블로 고정)
   async function saveScore() {
     const nameInput = document.getElementById("name");
     const saveBtn = document.getElementById("saveBtn");
@@ -559,7 +556,7 @@ const CONFIG = {
       saveBtn.textContent = "등록 중...";
 
       const { error } = await supabaseClient
-        .from('records') // ➡️ rankings에서 records 테이블 명으로 변경 완료!
+        .from('rankings') // ➡️ 선배님의 테이블 이름인 'rankings'로 정렬!
         .insert([{ name, score: lastScore }]);
 
       if (error) throw error;
@@ -569,7 +566,7 @@ const CONFIG = {
       await renderRank(); 
     } catch (err) {
       console.error("점수 등록 실패:", err);
-      alert("데이터 전송 실패! SQL Editor에서 테이블을 만들었는지 확인해 주세요.");
+      alert("데이터 전송 실패! SQL Editor에서 RLS 자물쇠를 해제했는지 확인해 주세요.");
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = "랭킹 등록";
