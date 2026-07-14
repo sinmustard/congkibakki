@@ -7,9 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-   미션 1 — 아래 값을 바꾸면 우리 팀 게임이 됩니다!
-   - bgImage: 다운로드한 배경 이미지 파일명 (같은 폴더에 두세요)
-   - supabaseUrl, supabaseKey: 내 Supabase 프로젝트 정보 입력 (비워두셔도 게임은 정상 작동합니다!)
+   미션 완료 — 선배님의 Supabase 정보 연동 완료!
    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
 const CONFIG = {
   title: "천하제일 청기백기",
@@ -18,9 +16,9 @@ const CONFIG = {
   team: "우리가 스피드 조",
   bgImage: "background.jpg",
   
-  // ⚡ 여기에 본인의 Supabase API 정보를 입력하세요! (비워두면 오프라인 모드로 작동)
-  supabaseUrl: "YOUR_SUPABASE_URL",
-  supabaseKey: "YOUR_SUPABASE_ANON_KEY"
+  // ⚡ 선배님이 찾아오신 정보가 완벽하게 세팅되었습니다!
+  supabaseUrl: "https://oijsrlbzxowlaxzmsxpt.supabase.co",
+  supabaseKey: "sb_publishable_m57hm2tIzHx_7GpppTBesg_BL4kNd26"
 };
 </script>
 <style>
@@ -212,8 +210,7 @@ const CONFIG = {
       <h2 style="color: #fff; margin-bottom: 15px; border-bottom: 2px solid #ff3b30; padding-bottom: 10px;">🚨 [캠프 디버거] 스크립트 실행 에러 감지!</h2>
       <p style="font-size: 16px; margin-bottom: 10px;"><b>원인:</b> ${e.message}</p>
       <p><b>파일 및 위치:</b> ${e.filename} (라인: ${e.lineno}, 열: ${e.colno})</p>
-      <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 15px; color: #ccc; overflow-x: auto; border: 1px solid #444;">${e.error ? e.error.stack : '스택 정보 없음 (브라우저 제한)'}</pre>
-      <p style="margin-top: 20px; color: #888;">💡 팁: 전체 복사가 덜 되었거나, 보안 환경(Local File CORS) 때문에 외부 CDN 라이브러리가 차단되었을 때 발생할 수 있습니다.</p>
+      <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 15px; color: #ccc; overflow-x: auto; border: 1px solid #444;">${e.error ? e.error.stack : '스택 정보 없음'}</pre>
     `;
     document.body.appendChild(errorDiv);
   });
@@ -293,14 +290,12 @@ const CONFIG = {
     document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
   }
 
-  // ⚡ [중요 업데이트] 변수명 충돌 방지를 위해 supabase -> supabaseClient로 변경!
   let supabaseClient = null;
   try {
     const isSupabaseLibraryLoaded = (typeof window.supabase !== 'undefined');
     const isConfigValid = CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" && CONFIG.supabaseUrl.startsWith("http");
 
     if (isSupabaseLibraryLoaded && isConfigValid) {
-      // 전역 window.supabase에 있는 공식 라이브러리 초기화 함수 사용
       supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
       console.log("Supabase 클라우드가 안전하게 연결되었습니다.");
     } else {
@@ -524,12 +519,12 @@ const CONFIG = {
     }
   }
 
-  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (비동기)
+  // ⚡ [Supabase API] 랭킹 실시간 가져오기
   async function renderRank() {
     const rankList = document.getElementById("rank");
     
     if (!supabaseClient) {
-      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중 (CONFIG에 Supabase 정보를 채우면 서버와 연결됩니다!)</li>";
+      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
       return;
     }
 
@@ -547,7 +542,7 @@ const CONFIG = {
         : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
     } catch (err) {
       console.error("랭킹 불러오기 실패:", err);
-      rankList.innerHTML = "<li>⚠️ 데이터베이스 통신 에러 (테이블 명을 다시 확인해주세요)</li>";
+      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패 (Supabase 테이블 생성 여부를 확인해주세요)</li>";
     }
   }
 
@@ -557,10 +552,7 @@ const CONFIG = {
     const saveBtn = document.getElementById("saveBtn");
     const name = nameInput.value.trim() || "익명";
     
-    if (!supabaseClient) {
-      alert("Supabase 정보가 CONFIG에 설정되지 않아 로컬 모드로 동작하고 있습니다.");
-      return;
-    }
+    if (!supabaseClient) return;
 
     try {
       saveBtn.disabled = true;
@@ -577,7 +569,7 @@ const CONFIG = {
       await renderRank(); 
     } catch (err) {
       console.error("점수 등록 실패:", err);
-      alert("데이터를 서버에 전송하지 못했습니다. SQL Editor에서 테이블을 생성했는지 확인해주세요!");
+      alert("데이터 전송 실패! SQL Editor에서 테이블을 만들었는지 확인해 주세요.");
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = "랭킹 등록";
