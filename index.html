@@ -4,17 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>청기백기 게임</title>
+<!-- ⚡ Supabase JS Client 라이브러리 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
    미션 1 — 아래 값을 바꾸면 우리 팀 게임이 됩니다!
-   bgImage: 다운로드한 배경 이미지 파일명 (같은 폴더에 두세요)
+   - bgImage: 다운로드한 배경 이미지 파일명 (같은 폴더에 두세요)
+   - supabaseUrl, supabaseKey: 내 Supabase 프로젝트 정보 입력
    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */
 const CONFIG = {
   title: "천하제일 청기백기",
   subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
   accent: "#4F46E5",
   team: "우리가 스피드 조",
-  bgImage: "background.jpg" 
+  bgImage: "background.jpg",
+  
+  // ⚡ 여기에 본인의 Supabase API 정보를 입력하세요!
+  supabaseUrl: "YOUR_SUPABASE_URL",
+  supabaseKey: "YOUR_SUPABASE_ANON_KEY"
 };
 </script>
 <style>
@@ -100,14 +107,14 @@ const CONFIG = {
     100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
   }
 
-  /* ⚡ 스피드 조 중앙 알림 이스터에그 스타일 (강렬한 레드 테마 유지) */
+  /* ⚡ 스피드 조 중앙 알림 이스터에그 스타일 (레드 강렬 테마) */
   .speed-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
     background: rgba(0, 0, 0, 0.95);
-    color: #FF3B30; /* 강렬한 레드 컬러 유지 */
+    color: #FF3B30; 
     padding: 22px 36px;
     border-radius: 16px;
     font-size: 26px;
@@ -116,7 +123,7 @@ const CONFIG = {
     pointer-events: none;
     text-align: center;
     box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
-    border: 3px solid #FF3B30; /* 테두리 레드 유지 */
+    border: 3px solid #FF3B30; 
     opacity: 0;
     white-space: nowrap;
   }
@@ -135,7 +142,7 @@ const CONFIG = {
     100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
   }
 
-  /* 🥚 이스터에그 보이지 않는 클릭 존 (좌우 하단 배치) */
+  /* 🥚 이스터에그 보이지 않는 클릭 존 */
   .hotspot {
     position: fixed;
     bottom: 10%;
@@ -189,6 +196,7 @@ const CONFIG = {
   <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
   <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
 
+  <!-- ⚡ "속도를 원하는 구나?" 이스터에그 팝업 -->
   <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
 
   <h1 id="title"></h1>
@@ -234,13 +242,13 @@ const CONFIG = {
     <div class="big" id="result"></div>
     <div id="saveBox" style="display:none">
       <input id="name" placeholder="이름 입력" maxlength="8">
-      <button class="save-btn" onclick="saveScore()">랭킹 등록</button>
+      <button class="save-btn" id="saveBtn" onclick="saveScore()">랭킹 등록</button>
     </div>
     <p class="hint">스페이스바를 눌러 게임을 시작하고 빠르게 대처하세요!</p>
   </div>
 
   <div class="card" id="rankCard">
-    <h2>🏆 명예의 전당 (성공 횟수 TOP 5)</h2>
+    <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
     <ol id="rank"></ol>
   </div>
 
@@ -257,14 +265,15 @@ const CONFIG = {
   
   document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
 
+  // ⚡ Supabase 인스턴스 초기화
+  const supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+
   const arena = document.getElementById("arena");
   const result = document.getElementById("result");
   const saveBox = document.getElementById("saveBox");
   const timerBar = document.getElementById("timerBar");
   const timerProgress = document.getElementById("timerProgress");
   const heartBox = document.getElementById("heartBox");
-  
-  const KEY = "rank_flag_game_v6"; 
   
   let state = "idle";
   let score = 0;
@@ -473,26 +482,74 @@ const CONFIG = {
     }
   }
 
-  function loadRank() { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
-
-  function renderRank() {
-    const list = loadRank().sort((a, b) => b.score - a.score).slice(0, 5);
-    document.getElementById("rank").innerHTML =
-      list.length ? list.map(r => `<li><b>${r.score} 회 성공</b> — ${r.name}</li>`).join("")
-                  : "<li>아직 기록이 없어요. 1등에 도전!</li>";
-  }
-
-  function saveScore() {
-    const name = document.getElementById("name").value.trim() || "익명";
-    const list = loadRank();
-    list.push({ name, score: lastScore, at: Date.now() });
-    localStorage.setItem(KEY, JSON.stringify(list));
+  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (비동기)
+  async function renderRank() {
+    const rankList = document.getElementById("rank");
     
-    saveBox.style.display = "none";
-    document.getElementById("name").value = "";
-    renderRank();
+    if (CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
+      rankList.innerHTML = "<li>⚠️ Supabase 설정을 완료해주세요!</li>";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('rankings')
+        .select('name, score')
+        .order('score', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      rankList.innerHTML = data.length 
+        ? data.map(r => `<li><b>${r.score} 회 성공</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>아직 기록이 없어요. 1등에 도전!</li>";
+    } catch (err) {
+      console.error("랭킹 불러오기 실패:", err);
+      rankList.innerHTML = "<li>⚠️ 랭킹 정보를 실시간으로 수신하지 못했습니다.</li>";
+    }
   }
 
+  // ⚡ [Supabase API] 신규 랭킹 등록 (비동기)
+  async function saveScore() {
+    const nameInput = document.getElementById("name");
+    const saveBtn = document.getElementById("saveBtn");
+    const name = nameInput.value.trim() || "익명";
+    
+    if (CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
+      alert("Supabase API 키가 등록되지 않았습니다.");
+      return;
+    }
+
+    try {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "등록 중...";
+
+      const { error } = await supabase
+        .from('rankings')
+        .insert([{ name, score: lastScore }]);
+
+      if (error) throw error;
+
+      saveBox.style.display = "none";
+      nameInput.value = "";
+      await renderRank(); // 등록 후 최신 랭킹 리프레시
+    } catch (err) {
+      console.error("점수 등록 실패:", err);
+      alert("점수를 데이터베이스에 전송하는 중 오류가 발생했습니다.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "랭킹 등록";
+    }
+  }
+
+  // XSS 방지용 이스케이프 유틸 함수
+  function escapeHtml(str) {
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  // 최초 로드 시 랭킹 노출
   renderRank();
 </script>
 </body>
