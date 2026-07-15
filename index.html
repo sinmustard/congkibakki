@@ -174,25 +174,39 @@ const CONFIG = {
     100% { background-color: #450a0a; } /* 경고 빨간색 */
   }
 
+  /* 💡 핫스팟 영역 스타일 가이드 */
   .hotspot {
     position: fixed;
-    bottom: 10%;
-    width: 16vw;
-    height: 16vw;
-    min-width: 110px;
-    min-height: 110px;
-    max-width: 200px;
-    max-height: 200px;
+    bottom: 8%;
+    width: 18vw;
+    height: 18vw;
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 180px;
+    max-height: 180px;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0); 
-    transition: background 0.2s, transform 0.1s;
+    z-index: 999; 
+    
+    background: rgba(0, 0, 0, 0.06); 
+    border: 2px dashed rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.45);
+    
+    transition: all 0.2s;
     touch-action: manipulation;
   }
   .hotspot:hover {
-    background: rgba(255, 223, 0, 0.04);
-    box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
+    background: rgba(255, 223, 0, 0.12);
+    border-color: rgba(255, 223, 0, 0.5);
+    color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 30px rgba(255, 223, 0, 0.25);
   }
   .hotspot:active {
     transform: scale(0.9);
@@ -224,11 +238,51 @@ const CONFIG = {
     user-select: text !important;
   }
   button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+  
+  /* 🏆 랭킹 그리드 레이아웃 스타일 추가 */
   #rankCard { margin-top: 18px; }
-  h2 { font-size: 17px; margin-bottom: 10px; }
-  ol { text-align: left; padding-left: 26px; }
-  li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
-  li b { color: var(--accent); }
+  h2 { font-size: 17px; margin-bottom: 15px; }
+  .rank-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 5px;
+  }
+  .rank-column {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    text-align: left;
+  }
+  .rank-column h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 6px;
+    text-align: center;
+  }
+  .rank-column ol {
+    padding-left: 20px;
+  }
+  .rank-column li {
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.08);
+    font-size: 13px;
+  }
+  .rank-column li:last-child {
+    border-bottom: none;
+  }
+  .rank-column li b {
+    color: var(--accent);
+  }
+
+  /* 모바일 세로 레이아웃 대응 */
+  @media (max-width: 480px) {
+    .rank-grid {
+      grid-template-columns: 1fr;
+    }
+  }
   
   footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
   footer span { transition: color 0.2s, text-shadow 0.2s; }
@@ -262,8 +316,8 @@ const CONFIG = {
 </script>
 </head>
 <body>
-  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
-  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')">🥁 북 구역</div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')">🔔 징 구역</div>
 
   <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
   <div id="extreme-popup" class="extreme-popup">🚨 익스트림 사이렌 감지! (0.6초 제한) 🚨</div>
@@ -318,7 +372,16 @@ const CONFIG = {
 
   <div class="card" id="rankCard">
     <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
-    <ol id="rank"></ol>
+    <div class="rank-grid">
+      <div class="rank-column">
+        <h3>✨ 일반 모드</h3>
+        <ol id="rank"></ol>
+      </div>
+      <div class="rank-column" style="border-color: rgba(239, 68, 68, 0.3);">
+        <h3 style="color: #EF4444;">🚨 익스트림</h3>
+        <ol id="rankExtreme"></ol>
+      </div>
+    </div>
   </div>
 
   <footer id="footer"></footer>
@@ -372,7 +435,10 @@ const CONFIG = {
   let animationFrameId = null;
 
   let isSpeedMode = false;
-  let isExtremeMode = false; // 🚨 익스트림 모드 플래그 추가!
+  let isExtremeMode = false; 
+
+  // 💡 기록 등록을 구별하기 위한 현재 세션 게임 모드 저장소
+  let gameModePlayed = "normal";
 
   // 📝 커맨드 입력을 저장할 감지 장치!
   let cheatInput = [];
@@ -391,7 +457,7 @@ const CONFIG = {
   document.getElementById("team-click").addEventListener("click", () => {
     recordCheatStep("speed");
 
-    if (isExtremeMode) return; // 익스트림 모드가 이미 켜졌다면 가벼운 스피드 모드는 생략
+    if (isExtremeMode) return; 
 
     isSpeedMode = true; 
     const speedPopup = document.getElementById("speed-popup");
@@ -423,7 +489,7 @@ const CONFIG = {
     isSpeedMode = false; 
 
     // 시각 강렬한 변경
-    document.documentElement.style.setProperty("--accent", "#EF4444"); // 경고용 진한 레드
+    document.documentElement.style.setProperty("--accent", "#EF4444"); 
     document.getElementById("title").textContent = "🚨 익스트림 청기백기 🚨";
     document.getElementById("title").style.color = "#EF4444";
     document.getElementById("subtitle").textContent = "⚠️ 제한 시간 0.6초! 당신의 손가락 한계를 시험하세요! ⚠️";
@@ -506,12 +572,14 @@ const CONFIG = {
     score = 0;
     lives = 3; 
     
-    // ⚡ 모드별 속도 분기 처리
+    // ⚡ 모드별 속도 분기 및 플레이 모드 판정 기록
     if (isExtremeMode) {
       limitTime = 600; // ⚡ 0.6초 초광속 반응 속도 모드!
+      gameModePlayed = "extreme"; 
     } else {
       restoreNormalMode(); // 일반 게임 시작 시 이전에 켜져 있던 테마 원복
       limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+      gameModePlayed = "normal";
     }
     
     flags = { blue: "down", white: "down" };
@@ -624,7 +692,7 @@ const CONFIG = {
         timerBar.style.display = "none";
         arena.className = "wait";
         arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
-        result.textContent = `최종 점수: ${score}회 성공`;
+        result.textContent = `최종 점수: ${score}회 성공 (${gameModePlayed === 'extreme' ? '🔥익스트림' : '일반'})`;
         
         lastScore = score;
         saveBox.style.display = "block";
@@ -635,32 +703,45 @@ const CONFIG = {
     }
   }
 
+  // 🏆 [수정] 양쪽 랭킹 데이터를 병렬로 불러와 화면에 꽂아주는 함수
   async function renderRank() {
     const rankList = document.getElementById("rank");
+    const rankExtremeList = document.getElementById("rankExtreme");
     
     if (!supabaseClient) {
       rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
+      rankExtremeList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
       return;
     }
 
     try {
-      const { data, error } = await supabaseClient
-        .from('rankings') 
-        .select('name, score')
-        .order('score', { ascending: false })
-        .limit(5);
+      // 일반 모드와 익스트림 모드 테이블을 동시 비동기 호출!
+      const [normalRes, extremeRes] = await Promise.all([
+        supabaseClient.from('rankings').select('name, score').order('score', { ascending: false }).limit(5),
+        supabaseClient.from('rankings_extreme').select('name, score').order('score', { ascending: false }).limit(5)
+      ]);
 
-      if (error) throw error;
+      if (normalRes.error) throw normalRes.error;
+      if (extremeRes.error) throw extremeRes.error;
 
-      rankList.innerHTML = data.length 
-        ? data.map(r => `<li><b>${r.score} 회 성공</b> — ${escapeHtml(r.name)}</li>`).join("")
-        : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
+      // 1. 일반 모드 랭킹 바인딩
+      rankList.innerHTML = normalRes.data.length 
+        ? normalRes.data.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>기록이 없습니다.</li>";
+
+      // 2. 익스트림 모드 랭킹 바인딩
+      rankExtremeList.innerHTML = extremeRes.data.length 
+        ? extremeRes.data.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>기록이 없습니다.</li>";
+
     } catch (err) {
       console.error("랭킹 불러오기 실패:", err);
-      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패</li>";
+      rankList.innerHTML = "<li>⚠️ 로드 실패</li>";
+      rankExtremeList.innerHTML = "<li>⚠️ 로드 실패</li>";
     }
   }
 
+  // 🏆 [수정] 현재 모드(gameModePlayed) 판정 후 알맞은 테이블에 저장하는 함수
   async function saveScore() {
     const nameInput = document.getElementById("name");
     const saveBtn = document.getElementById("saveBtn");
@@ -672,8 +753,11 @@ const CONFIG = {
       saveBtn.disabled = true;
       saveBtn.textContent = "등록 중...";
 
+      // 익스트림 상태였다면 rankings_extreme에, 아니면 일반 rankings에 등록!
+      const targetTable = (gameModePlayed === "extreme") ? 'rankings_extreme' : 'rankings';
+
       const { error } = await supabaseClient
-        .from('rankings') 
+        .from(targetTable) 
         .insert([{ name, score: lastScore }]);
 
       if (error) throw error;
@@ -683,7 +767,7 @@ const CONFIG = {
       await renderRank(); 
     } catch (err) {
       console.error("점수 등록 실패:", err);
-      alert("데이터 전송 실패!");
+      alert("데이터 전송 실패! 테이블 생성 유무를 확인하세요.");
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = "랭킹 등록";
