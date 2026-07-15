@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚨 청기백기 게임 (Easter Egg Edition) 🚨</title>
+  <title>🚨 청기백기 게임 🚨</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/releases/v5.15.4/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
     body {
       font-family: 'Jua', 'Do Hyeon', sans-serif;
     }
-    /* 깜빡이는 애니메이션 (성공/실패 시 사용) */
+    /* 익스트림 모드 깜빡임 효과 */
     @keyframes flash {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
@@ -27,7 +27,7 @@
 
   <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-6 text-center border-4 border-indigo-200">
     
-    <h1 class="text-4xl font-extrabold text-indigo-600 mb-2 cursor-pointer select-none hover:scale-105 transition-transform" id="gameTitle" onclick="triggerExtremeEasterEgg()">
+    <h1 class="text-4xl font-extrabold text-indigo-600 mb-2 cursor-pointer select-none hover:scale-105 transition-transform" id="gameTitle" onclick="toggleMode()">
       🔵 청기백기 🔴
     </h1>
     <p class="text-gray-500 text-sm mb-6" id="gameSubtitle">깃발을 지시에 맞게 올리거나 내려보세요!</p>
@@ -86,4 +86,295 @@
       <p class="text-xs text-amber-600 mb-3">축하합니다! 점수를 랭킹에 등록해 보세요.</p>
       <div class="flex gap-2">
         <input type="text" id="playerName" placeholder="닉네임 입력 (최대8자)" class="flex-1 px-3 py-2 rounded-xl border border-amber-300 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" maxlength="8">
-        <button onclick="submitScoreToLeaderboard()" class="bg-amber-500 hover:bg-
+        <button onclick="submitScoreToLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all">등록</button>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t pt-6 text-left">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-700 flex items-center gap-2" id="rankingBoardTitle">
+          🏆 명예의 전당
+        </h3>
+        <button onclick="fetchRankings()" class="text-xs text-gray-400 hover:text-indigo-500 transition-colors">새로고침 🔄</button>
+      </div>
+      
+      <div class="bg-gray-50 rounded-2xl p-3 max-h-48 overflow-y-auto" id="rankingList">
+        <p class="text-xs text-gray-400 text-center py-4">랭킹 데이터를 불러오는 중...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // Supabase 설정
+    // ==========================================
+    const SUPABASE_URL = "https://gqomvmlpsivzllzllayx.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxb212bWxwc2l2emxsemxsYXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNTc4NjYsImV4cCI6MjA1NTczMzg2Nn0.f9XJ1H7w4_e-0O76Bw0h76Y2wD9V2H31x0l_Fqf1L0A";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ==========================================
+    // 게임 변수
+    // ==========================================
+    let score = 0;
+    let bestScore = localStorage.getItem('best_score_normal') || 0;
+    let isPlaying = false;
+    let isExtremeMode = false; // 기본은 일반 모드
+
+    let currentTask = null;
+    let timer = null;
+    let timeLeft = 100;
+    let timeLimit = 3000;
+
+    let blueFlag = "down";
+    let redFlag = "down";
+
+    // 일반 지시어
+    const flagCommands = [
+      { text: "청기 올려!", blue: "up", red: "down" },
+      { text: "백기 올려!", blue: "down", red: "up" },
+      { text: "청기 내리지 말고 백기 올려!", blue: "up", red: "up" },
+      { text: "백기 내리지 말고 청기 올려!", blue: "up", red: "up" },
+      { text: "청기 올려! 백기 올려!", blue: "up", red: "up" },
+      { text: "청기 내려! 백기 내려!", blue: "down", red: "down" },
+      { text: "청기 올리지 말고 백기 내려!", blue: "down", red: "down" },
+      { text: "백기 올리지 말고 청기 내려!", blue: "down", red: "down" }
+    ];
+
+    // 익스트림 전용 훼이크 지시어
+    const extremeCommands = [
+      { text: "🔥 청기 올리지 마라잇!", blue: "down", red: "down" },
+      { text: "🔥 백기 올리지 말고 청기 내려...가 아니라 올려!", blue: "up", red: "down" },
+      { text: "🔥 청기 올리고 백기 내리는 척하면서 올려!", blue: "up", red: "up" },
+      { text: "🔥 양쪽 다 하늘 위로 올려!", blue: "up", red: "up" },
+      { text: "🔥 청기 올려! 라고 할줄 알았냐? 백기 내려!", blue: "down", red: "down" },
+      { text: "🔥 백기 올려! (단, 청기도 올려야 함)", blue: "up", red: "up" }
+    ];
+
+    // 초기 로딩
+    document.getElementById('bestScore').innerText = bestScore;
+    fetchRankings(); // 초기 랭킹 로드
+
+    // ==========================================
+    // 1. 모드 전환 토글 (타이틀 클릭 이펙트)
+    // ==========================================
+    function toggleMode() {
+      if (isPlaying) return; // 게임 중에는 모드 전환 금지
+
+      isExtremeMode = !isExtremeMode;
+
+      if (isExtremeMode) {
+        // 익스트림 모드 UI 활성화
+        document.getElementById('bodyBg').className = "bg-gradient-to-br from-red-950 to-gray-900 min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500";
+        document.getElementById('gameTitle').innerText = "🚨 익스트림 청기백기 🚨";
+        document.getElementById('gameTitle').className = "text-4xl font-extrabold text-red-500 mb-2 cursor-pointer select-none hover:scale-105 transition-transform flash-effect";
+        document.getElementById('gameSubtitle').innerText = "🔥 15년 차 전용 지옥불 맛 이스터에그 모드 🔥";
+        document.getElementById('gameSubtitle').className = "text-red-400 text-sm mb-6 font-bold";
+        
+        // 최고 점수 & 랭킹판 데이터 즉시 교체
+        bestScore = localStorage.getItem('best_score_extreme') || 0;
+        document.getElementById('bestScore').innerText = bestScore;
+        fetchRankings();
+      } else {
+        // 일반 모드로 복귀
+        document.getElementById('bodyBg').className = "bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500";
+        document.getElementById('gameTitle').innerText = "🔵 청기백기 🔴";
+        document.getElementById('gameTitle').className = "text-4xl font-extrabold text-indigo-600 mb-2 cursor-pointer select-none hover:scale-105 transition-transform";
+        document.getElementById('gameSubtitle').innerText = "깃발을 지시에 맞게 올리거나 내려보세요!";
+        document.getElementById('gameSubtitle').className = "text-gray-500 text-sm mb-6";
+        
+        // 최고 점수 & 랭킹판 데이터 즉시 복구
+        bestScore = localStorage.getItem('best_score_normal') || 0;
+        document.getElementById('bestScore').innerText = bestScore;
+        fetchRankings();
+      }
+    }
+
+    // ==========================================
+    // 2. 게임 플레이 코어
+    // ==========================================
+    function startGame() {
+      if (isPlaying) return;
+      isPlaying = true;
+      score = 0;
+      updateScoreDisplay();
+
+      blueFlag = "down";
+      redFlag = "down";
+      updateFlagVisual();
+
+      document.getElementById('startArea').className = "hidden";
+      document.getElementById('controlArea').className = "grid grid-cols-2 gap-4";
+      document.getElementById('rankSubmitArea').className = "hidden";
+
+      nextRound();
+    }
+
+    function nextRound() {
+      if (!isPlaying) return;
+
+      let dynamicTimeLimit = Math.max(800, timeLimit - (score * 120));
+      const commandPool = isExtremeMode ? [...flagCommands, ...extremeCommands] : flagCommands;
+      const randomIndex = Math.floor(Math.random() * commandPool.length);
+      const chosenCommand = commandPool[randomIndex];
+
+      document.getElementById('instruction').innerText = chosenCommand.text;
+
+      currentTask = {
+        blue: chosenCommand.blue,
+        red: chosenCommand.red
+      };
+
+      clearInterval(timer);
+      timeLeft = 100;
+      const intervalTime = dynamicTimeLimit / 100;
+
+      timer = setInterval(() => {
+        timeLeft -= 1;
+        document.getElementById('timerBar').style.width = timeLeft + "%";
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          gameOver("⏰ 시간 초과! 조금 더 부지런히 깃발을 지휘해 주세요!");
+        }
+      }, intervalTime);
+    }
+
+    function handleInput(flagColor, action) {
+      if (!isPlaying) return;
+
+      if (flagColor === 'blue') blueFlag = action;
+      if (flagColor === 'red') redFlag = action;
+
+      updateFlagVisual();
+
+      if (blueFlag === currentTask.blue && redFlag === currentTask.red) {
+        clearInterval(timer);
+        score++;
+        updateScoreDisplay();
+        setTimeout(nextRound, 150);
+      }
+    }
+
+    function updateFlagVisual() {
+      const bVisual = document.getElementById('blueFlagVisual');
+      const rVisual = document.getElementById('redFlagVisual');
+
+      if (blueFlag === 'up') {
+        bVisual.style.opacity = "1";
+        bVisual.style.transform = "translateY(-10px) scale(1.1)";
+      } else {
+        bVisual.style.opacity = "0.3";
+        bVisual.style.transform = "translateY(0) scale(1)";
+      }
+
+      if (redFlag === 'up') {
+        rVisual.style.opacity = "1";
+        rVisual.style.transform = "translateY(-10px) scale(1.1)";
+      } else {
+        rVisual.style.opacity = "0.3";
+        rVisual.style.transform = "translateY(0) scale(1)";
+      }
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('currentScore').innerText = score;
+    }
+
+    function gameOver(reason) {
+      isPlaying = false;
+      clearInterval(timer);
+      document.getElementById('instruction').innerText = "💀 게임 오버 💀\n" + reason;
+
+      document.getElementById('startArea').className = "block";
+      document.getElementById('controlArea').className = "hidden";
+
+      const bestKey = isExtremeMode ? 'best_score_extreme' : 'best_score_normal';
+      let currentBest = localStorage.getItem(bestKey) || 0;
+
+      if (score > currentBest) {
+        localStorage.setItem(bestKey, score);
+        bestScore = score;
+        document.getElementById('bestScore').innerText = score;
+      }
+
+      if (score > 0) {
+        document.getElementById('rankSubmitArea').className = "block bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6 text-left";
+      }
+    }
+
+    // ==========================================
+    // 3. Supabase 연동 (조용한 단일 랭킹판 스왑)
+    // ==========================================
+    async function fetchRankings() {
+      // 모드 상태에 따라 자동으로 테이블 결정
+      const table = isExtremeMode ? 'rankings_extreme' : 'rankings';
+      const rankingListDiv = document.getElementById('rankingList');
+
+      try {
+        const { data, error } = await _supabase
+          .from(table)
+          .select('*')
+          .order('score', { ascending: false })
+          .limit(5);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          rankingListDiv.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">아직 등록된 랭킹 정보가 없습니다. 첫 챔피언이 되어보세요!</p>`;
+          return;
+        }
+
+        let htmlContent = "";
+        data.forEach((row, idx) => {
+          let badge = `🏅 ${idx + 1}등`;
+          if (idx === 0) badge = "🥇 1등";
+          if (idx === 1) badge = "🥈 2등";
+          if (idx === 2) badge = "🥉 3등";
+
+          // 익스트림 모드일 땐 랭킹 글자도 불타는 붉은색 테두리 적용
+          const bgStyle = idx === 0 
+            ? (isExtremeMode ? 'bg-red-950/40 text-red-200 border border-red-500' : 'bg-amber-100 text-amber-900 border border-amber-300') 
+            : 'bg-white text-gray-700';
+
+          htmlContent += `
+            <div class="flex justify-between items-center px-4 py-2 rounded-xl mb-1 text-sm font-semibold shadow-sm ${bgStyle}">
+              <span>${badge} - ${row.name || "무명기사"}</span>
+              <span class="text-indigo-600 font-extrabold ${isExtremeMode ? 'text-red-400' : ''}">${row.score}점</span>
+            </div>
+          `;
+        });
+
+        rankingListDiv.innerHTML = htmlContent;
+
+      } catch (err) {
+        console.error("랭킹 로드 실패:", err);
+        rankingListDiv.innerHTML = `<p class="text-xs text-red-400 text-center py-4">랭킹 데이터를 불러오는 중 에러 발생</p>`;
+      }
+    }
+
+    async function submitScoreToLeaderboard() {
+      const nameInput = document.getElementById('playerName');
+      const nickname = nameInput.value.trim() || "익명";
+      const table = isExtremeMode ? 'rankings_extreme' : 'rankings';
+
+      try {
+        const { error } = await _supabase
+          .from(table)
+          .insert([{ name: nickname, score: score }]);
+
+        if (error) throw error;
+
+        alert(`🎖️ ${nickname}님의 점수(${score}점)가 등록되었습니다!`);
+        document.getElementById('rankSubmitArea').className = "hidden";
+        nameInput.value = "";
+        
+        fetchRankings(); // 등록 직후 랭킹 즉시 새로고침
+      } catch (err) {
+        console.error("랭킹 등록 오류:", err);
+        alert("등록 중 오류가 발생했습니다.");
+      }
+    }
+  </script>
+</body>
+</html>
