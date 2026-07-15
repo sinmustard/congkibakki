@@ -1,380 +1,1705 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚨 청기백기 게임 🚨</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/releases/v5.15.4/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: 'Jua', 'Do Hyeon', sans-serif;
-    }
-    /* 익스트림 모드 깜빡임 효과 */
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .flash-effect {
-      animation: flash 0.5s ease-in-out infinite;
-    }
-  </style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500" id="bodyBg">
-
-  <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-6 text-center border-4 border-indigo-200">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>청기백기 게임</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const CONFIG = {
+  title: "천하제일 청기백기",
+  subtitle: "제한 시간 안에 올바른 깃발 상태를 만드세요!",
+  accent: "#4F46E5",
+  team: "우리가 스피드 조",
+  bgImage: "background.jpg",
+  
+  supabaseUrl: "https://oijsrlbzxowlaxzmsxpt.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9panNybGJ6eG93bGF4em1zeHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMTYwMTUsImV4cCI6MjA5OTU5MjAxNX0.76pOHZIZQnJfIvwJOGBy49xbL4loAmKBJYQcV9SSo4U"
+};
+</script>
+<style>
+  :root { --accent: #4F46E5; --ink: #22335C; --sub: #6B7690; --bg: #FAF8F2; --card: rgba(255, 255, 255, 0.88); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body { 
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; 
+    color: var(--ink); 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 24px 16px;
+    position: relative; 
+    overflow-x: hidden;
     
-    <h1 class="text-4xl font-extrabold text-indigo-600 mb-2 cursor-pointer select-none hover:scale-105 transition-transform" id="gameTitle" onclick="toggleMode()">
-      🔵 청기백기 🔴
-    </h1>
-    <p class="text-gray-500 text-sm mb-6" id="gameSubtitle">깃발을 지시에 맞게 올리거나 내려보세요!</p>
+    background-color: #f1f5f9; 
+    background-image: url('background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 
-    <div class="flex justify-between items-center bg-indigo-50 px-6 py-3 rounded-2xl mb-6">
-      <div class="text-left">
-        <span class="text-gray-500 text-xs block font-bold">CURRENT SCORE</span>
-        <span class="text-3xl font-black text-indigo-600" id="currentScore">0</span>
-      </div>
-      <div class="text-right">
-        <span class="text-gray-500 text-xs block font-bold">BEST SCORE</span>
-        <span class="text-3xl font-black text-amber-500" id="bestScore">0</span>
-      </div>
+    /* 패드 터치 시 텍스트가 파랗게 드래그 차단 */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; }
+  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+  
+  .card { 
+    background: var(--card); 
+    backdrop-filter: blur(6px); 
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    padding: 24px; 
+    width: 100%; 
+    max-width: 440px; 
+    text-align: center; 
+    z-index: 2; 
+  }
+  
+  #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
+
+  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); touch-action: manipulation; }
+  #arena.wait { background: #E05B5B; }
+  #arena.go { background: #27B85B; }
+
+  #timerBar { width: 100%; height: 8px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
+  #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
+
+  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } 
+  .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
+  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .flag-cloth.up { top: 5px; }
+  .flag-cloth.blue { background: #3B82F6; color: white; }
+  .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+
+  .egg-popup {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0);
+    font-size: 34px;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.25);
+  }
+  #egg-blue { color: #1E40AF; } 
+  #egg-white { color: #EA580C; } 
+
+  .egg-popup.show {
+    animation: bounce-up 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes bounce-up {
+    0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
+    30% { transform: translate(-50%, -60px) scale(1.4); opacity: 1; }
+    80% { transform: translate(-50%, -85px) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
+  }
+
+  .speed-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(0, 0, 0, 0.95);
+    color: #FF3B30; 
+    padding: 22px 36px;
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 900;
+    z-index: 9999; 
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
+    border: 3px solid #FF3B30; 
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .speed-popup.show {
+    animation: speed-pop-shake 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes speed-pop-shake {
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
+    15% { transform: translate(-50%, -50%) scale(1.0) rotate(3deg); }
+    20% { transform: translate(-50%, -50%) scale(1.0) rotate(-2deg); }
+    25% { transform: translate(-50%, -50%) scale(1.0) rotate(2deg); }
+    30% { transform: translate(-50%, -50%) scale(1.0) rotate(-1deg); }
+    80% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
+  .hotspot {
+    position: fixed;
+    bottom: 10%;
+    width: 16vw;
+    height: 16vw;
+    min-width: 110px;
+    min-height: 110px;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0); 
+    transition: background 0.2s, transform 0.1s;
+    touch-action: manipulation;
+  }
+  .hotspot:hover {
+    background: rgba(255, 223, 0, 0.04);
+    box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
+  }
+  .hotspot:active {
+    transform: scale(0.9);
+  }
+  #hotspot-drum { left: 5%; }  
+  #hotspot-gong { right: 5%; } 
+
+  .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .control-col { display: flex; flex-direction: column; gap: 8px; }
+  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); touch-action: manipulation; }
+  .control-btn:active { transform: scale(0.95); }
+  .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-blue { background: #3B82F6; color: white; }
+  .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+  .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+
+  .big { font-size: 28px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
+  .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
+  
+  input { 
+    padding: 10px 12px; 
+    border: 2px solid #E5E0D4; 
+    border-radius: 10px; 
+    font-size: 15px; 
+    width: 55%; 
+    margin-right: 6px; 
+    background: rgba(255,255,255,0.9);
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+  button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+  #rankCard { margin-top: 18px; }
+  h2 { font-size: 17px; margin-bottom: 10px; }
+  ol { text-align: left; padding-left: 26px; }
+  li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+  li b { color: var(--accent); }
+  
+  footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+  footer span { transition: color 0.2s, text-shadow 0.2s; }
+  footer span:hover { color: #EF4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+</style>
+
+<script>
+  window.addEventListener('error', function(e) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.height = '100%';
+    errorDiv.style.background = 'rgba(0,0,0,0.93)';
+    errorDiv.style.color = '#ff3b30';
+    errorDiv.style.padding = '30px';
+    errorDiv.style.zIndex = '999999';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.style.fontSize = '14px';
+    errorDiv.style.lineHeight = '1.6';
+    errorDiv.style.overflow = 'auto';
+    errorDiv.innerHTML = `
+      <h2 style="color: #fff; margin-bottom: 15px; border-bottom: 2px solid #ff3b30; padding-bottom: 10px;">🚨 [캠프 디버거] 스크립트 실행 에러 감지!</h2>
+      <p style="font-size: 16px; margin-bottom: 10px;"><b>원인:</b> ${e.message}</p>
+      <p><b>파일 및 위치:</b> ${e.filename} (라인: ${e.lineno}, 열: ${e.colno})</p>
+      <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 15px; color: #ccc; overflow-x: auto; border: 1px solid #444;">${e.error ? e.error.stack : '스택 정보 없음'}</pre>
+    `;
+    document.body.appendChild(errorDiv);
+  });
+</script>
+</head>
+<body>
+  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+
+  <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
+
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="card">
+    <div id="heartBox">❤️❤️❤️</div>
+
+    <div id="arena">클릭 또는 스페이스바를 눌러 시작</div>
+    
+    <div id="timerBar">
+      <div id="timerProgress"></div>
     </div>
 
-    <div class="bg-gray-100 rounded-2xl p-6 h-64 flex flex-col justify-between items-center relative overflow-hidden border-2 border-gray-200 mb-6" id="gameDisplay">
-      <div class="my-auto">
-        <h2 class="text-2xl font-bold text-gray-700 leading-relaxed" id="instruction">
-          "게임 시작 버튼을 눌러주세요!"
-        </h2>
-      </div>
-
-      <div class="flex gap-12 text-5xl mb-4" id="visualContainer">
-        <div class="flex flex-col items-center transition-all duration-300" id="blueFlagVisual" style="opacity: 0.3;">
-          <span class="text-xs font-bold text-blue-600 mb-1">청기</span>
-          🔵
+    <div class="flag-container">
+      <div class="flag-pole-wrapper">
+        <div id="egg-blue" class="egg-popup">북</div>
+        <div class="flag-pole">
+          <div id="flagBlue" class="flag-cloth blue">청기</div>
         </div>
-        <div class="flex flex-col items-center transition-all duration-300" id="redFlagVisual" style="opacity: 0.3;">
-          <span class="text-xs font-bold text-red-600 mb-1">백기</span>
-          🔴
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
+      </div>
+      <div class="flag-pole-wrapper">
+        <div id="egg-white" class="egg-popup">징</div>
+        <div class="flag-pole">
+          <div id="flagWhite" class="flag-cloth white">백기</div>
         </div>
-      </div>
-
-      <div class="absolute bottom-0 left-0 h-2 bg-indigo-500 transition-all duration-100" id="timerBar" style="width: 100%;"></div>
-    </div>
-
-    <div id="startArea" class="block">
-      <button onclick="startGame()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl text-xl shadow-lg transform active:scale-95 transition-all">
-        🎮 게임 시작
-      </button>
-    </div>
-
-    <div id="controlArea" class="hidden grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-2">
-        <button onclick="handleInput('blue', 'up')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow active:scale-95 transition-all">🔵 청기 올려</button>
-        <button onclick="handleInput('blue', 'down')" class="bg-blue-900 hover:bg-blue-950 text-white font-bold py-4 rounded-2xl shadow active:scale-95 transition-all">🔵 청기 내려</button>
-      </div>
-      <div class="flex flex-col gap-2">
-        <button onclick="handleInput('red', 'up')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl shadow active:scale-95 transition-all">🔴 백기 올려</button>
-        <button onclick="handleInput('red', 'down')" class="bg-red-900 hover:bg-red-950 text-white font-bold py-4 rounded-2xl shadow active:scale-95 transition-all">🔴 백기 내려</button>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 (▲ / ▼)</div>
       </div>
     </div>
 
-    <div id="rankSubmitArea" class="hidden bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6 text-left">
-      <h3 class="font-bold text-amber-800 mb-1">🎉 명예의 전당 등록</h3>
-      <p class="text-xs text-amber-600 mb-3">축하합니다! 점수를 랭킹에 등록해 보세요.</p>
-      <div class="flex gap-2">
-        <input type="text" id="playerName" placeholder="닉네임 입력 (최대8자)" class="flex-1 px-3 py-2 rounded-xl border border-amber-300 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" maxlength="8">
-        <button onclick="submitScoreToLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all">등록</button>
+    <div class="control-grid">
+      <div class="control-col">
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'up')">🔵 청기 올려<span class="key-hint">W 키</span></button>
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
+      </div>
+      <div class="control-col">
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">▲ 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">▼ 키</span></button>
       </div>
     </div>
 
-    <div class="mt-8 border-t pt-6 text-left">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-gray-700 flex items-center gap-2" id="rankingBoardTitle">
-          🏆 명예의 전당
-        </h3>
-        <button onclick="fetchRankings()" class="text-xs text-gray-400 hover:text-indigo-500 transition-colors">새로고침 🔄</button>
-      </div>
-      
-      <div class="bg-gray-50 rounded-2xl p-3 max-h-48 overflow-y-auto" id="rankingList">
-        <p class="text-xs text-gray-400 text-center py-4">랭킹 데이터를 불러오는 중...</p>
-      </div>
+    <div class="big" id="result"></div>
+    <div id="saveBox" style="display:none">
+      <input id="name" placeholder="이름 입력" maxlength="8">
+      <button class="save-btn" id="saveBtn" onclick="saveScore()">랭킹 등록</button>
     </div>
-
+    <p class="hint">스페이스바를 눌러 게임을 시작하고 빠르게 대처하세요!</p>
   </div>
 
-  <script>
-    // ==========================================
-    // Supabase 설정
-    // ==========================================
-    const SUPABASE_URL = "https://gqomvmlpsivzllzllayx.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxb212bWxwc2l2emxsemxsYXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNTc4NjYsImV4cCI6MjA1NTczMzg2Nn0.f9XJ1H7w4_e-0O76Bw0h76Y2wD9V2H31x0l_Fqf1L0A";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <div class="card" id="rankCard">
+    <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
+    <ol id="rank"></ol>
+  </div>
 
-    // ==========================================
-    // 게임 변수
-    // ==========================================
-    let score = 0;
-    let bestScore = localStorage.getItem('best_score_normal') || 0;
-    let isPlaying = false;
-    let isExtremeMode = false; // 기본은 일반 모드
+  <footer id="footer"></footer>
 
-    let currentTask = null;
-    let timer = null;
-    let timeLeft = 100;
-    let timeLimit = 3000;
+<script>
+  document.documentElement.style.setProperty("--accent", CONFIG.accent);
+  document.getElementById("title").textContent = CONFIG.title;
+  document.getElementById("subtitle").textContent = CONFIG.subtitle;
+  
+  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
+  document.title = CONFIG.title;
+  
+  if(CONFIG.bgImage) {
+    document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
+  }
 
-    let blueFlag = "down";
-    let redFlag = "down";
+  let supabaseClient = null;
+  try {
+    const isSupabaseLibraryLoaded = (typeof window.supabase !== 'undefined');
+    const isConfigValid = CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" && CONFIG.supabaseUrl.startsWith("http");
 
-    // 일반 지시어
-    const flagCommands = [
-      { text: "청기 올려!", blue: "up", red: "down" },
-      { text: "백기 올려!", blue: "down", red: "up" },
-      { text: "청기 내리지 말고 백기 올려!", blue: "up", red: "up" },
-      { text: "백기 내리지 말고 청기 올려!", blue: "up", red: "up" },
-      { text: "청기 올려! 백기 올려!", blue: "up", red: "up" },
-      { text: "청기 내려! 백기 내려!", blue: "down", red: "down" },
-      { text: "청기 올리지 말고 백기 내려!", blue: "down", red: "down" },
-      { text: "백기 올리지 말고 청기 내려!", blue: "down", red: "down" }
-    ];
+    if (isSupabaseLibraryLoaded && isConfigValid) {
+      supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+      console.log("Supabase 클라우드가 안전하게 연결되었습니다.");
+    } else {
+      console.warn("Supabase가 연결되지 않았습니다. 오프라인 모드로 실행됩니다.");
+    }
+  } catch (err) {
+    console.error("Supabase 엔진 초기화 실패. 오프라인 플레이로 우회합니다:", err);
+  }
 
-    // 익스트림 전용 훼이크 지시어
-    const extremeCommands = [
-      { text: "🔥 청기 올리지 마라잇!", blue: "down", red: "down" },
-      { text: "🔥 백기 올리지 말고 청기 내려...가 아니라 올려!", blue: "up", red: "down" },
-      { text: "🔥 청기 올리고 백기 내리는 척하면서 올려!", blue: "up", red: "up" },
-      { text: "🔥 양쪽 다 하늘 위로 올려!", blue: "up", red: "up" },
-      { text: "🔥 청기 올려! 라고 할줄 알았냐? 백기 내려!", blue: "down", red: "down" },
-      { text: "🔥 백기 올려! (단, 청기도 올려야 함)", blue: "up", red: "up" }
-    ];
+  const arena = document.getElementById("arena");
+  const result = document.getElementById("result");
+  const saveBox = document.getElementById("saveBox");
+  const timerBar = document.getElementById("timerBar");
+  const timerProgress = document.getElementById("timerProgress");
+  const heartBox = document.getElementById("heartBox");
+  
+  let state = "idle";
+  let score = 0;
+  let lastScore = 0;
+  let lives = 3; 
+  
+  let flags = { blue: "down", white: "down" };
 
-    // 초기 로딩
-    document.getElementById('bestScore').innerText = bestScore;
-    fetchRankings(); // 초기 랭킹 로드
+  let currentCommand = null;
+  let initialLimitTime = 2500; 
+  let limitTime = 2500;
+  let timeLeft = 0;
+  let lastFrameTime = 0;
+  let animationFrameId = null;
 
-    // ==========================================
-    // 1. 모드 전환 토글 (타이틀 클릭 이펙트)
-    // ==========================================
-    function toggleMode() {
-      if (isPlaying) return; // 게임 중에는 모드 전환 금지
+  let isSpeedMode = false;
 
-      isExtremeMode = !isExtremeMode;
+  const COMMANDS = [
+    { text: "청기 올려!", check: (f) => f.blue === "up" && f.white === "down" },
+    { text: "백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "둘 다 올려!", check: (f) => f.blue === "up" && f.white === "up" },
+    { text: "둘 다 내려!", check: (f) => f.blue === "down" && f.white === "down" },
+    { text: "청기 내리고 백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
+  ];
 
-      if (isExtremeMode) {
-        // 익스트림 모드 UI 활성화
-        document.getElementById('bodyBg').className = "bg-gradient-to-br from-red-950 to-gray-900 min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500";
-        document.getElementById('gameTitle').innerText = "🚨 익스트림 청기백기 🚨";
-        document.getElementById('gameTitle').className = "text-4xl font-extrabold text-red-500 mb-2 cursor-pointer select-none hover:scale-105 transition-transform flash-effect";
-        document.getElementById('gameSubtitle').innerText = "🔥 15년 차 전용 지옥불 맛 이스터에그 모드 🔥";
-        document.getElementById('gameSubtitle').className = "text-red-400 text-sm mb-6 font-bold";
+  document.getElementById("team-click").addEventListener("click", () => {
+    isSpeedMode = true; 
+
+    const speedPopup = document.getElementById("speed-popup");
+    speedPopup.classList.remove("show");
+    void speedPopup.offsetWidth; 
+    speedPopup.classList.add("show");
+
+    if (state === "playing") {
+      limitTime = limitTime / 2;
+      timeLeft = timeLeft / 2;
+    }
+  });
+
+  function playEasterEgg(side, text) {
+    const eggText = document.getElementById(`egg-${side}`);
+    eggText.textContent = text;
+    
+    eggText.classList.remove("show");
+    void eggText.offsetWidth; 
+    eggText.classList.add("show");
+
+    const flagId = side === "blue" ? "flagBlue" : "flagWhite";
+    const flagEl = document.getElementById(flagId);
+    flagEl.style.transform = "scale(1.2) rotate(15deg)";
+    setTimeout(() => {
+      flagEl.style.transform = "";
+    }, 150);
+  }
+
+  function updateHeartGraphics() {
+    heartBox.textContent = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
+  }
+
+  function setButtonsDisabled(disabled) {
+    document.querySelectorAll(".control-btn").forEach(btn => btn.disabled = disabled);
+  }
+
+  setButtonsDisabled(true);
+
+  function updateFlagGraphics() {
+    const flagBlue = document.getElementById("flagBlue");
+    const flagWhite = document.getElementById("flagWhite");
+
+    if (flags.blue === "up") flagBlue.classList.add("up");
+    else flagBlue.classList.remove("up");
+
+    if (flags.white === "up") flagWhite.classList.add("up");
+    else flagWhite.classList.remove("up");
+  }
+
+  function controlFlag(color, action) {
+    if (state !== "playing") return;
+    flags[color] = action;
+    updateFlagGraphics();
+  }
+
+  function triggerGameStart() {
+    score = 0;
+    lives = 3; 
+    
+    limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+    
+    flags = { blue: "down", white: "down" };
+    updateFlagGraphics();
+    updateHeartGraphics();
+    
+    result.textContent = "";
+    saveBox.style.display = "none";
+    timerBar.style.display = "block";
+    heartBox.style.display = "block";
+    
+    nextRound();
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement.tagName === "INPUT") return;
+
+    if (e.key === " ") {
+      if (state === "idle" || state === "done") {
+        e.preventDefault(); 
+        triggerGameStart();
+        return;
+      }
+    }
+
+    if (state !== "playing") return;
+    
+    if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
+    if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
+    
+    if (e.key === "ArrowUp") {
+      e.preventDefault(); 
+      controlFlag("white", "up");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      controlFlag("white", "down");
+    }
+  });
+
+  function gameLoop(now) {
+    if (state !== "playing") return;
+
+    const dt = now - lastFrameTime;
+    lastFrameTime = now;
+    timeLeft -= dt;
+
+    const percent = Math.max(0, (timeLeft / limitTime) * 100);
+    timerProgress.style.width = percent + "%";
+
+    if (timeLeft <= 0) {
+      evaluateRound();
+    } else {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  arena.addEventListener("click", () => {
+    if (state === "idle" || state === "done") {
+      triggerGameStart();
+    }
+  });
+
+  function nextRound() {
+    state = "playing";
+    arena.className = "";
+    setButtonsDisabled(false);
+    
+    currentCommand = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
+    arena.textContent = currentCommand.text;
+
+    timeLeft = limitTime;
+    lastFrameTime = performance.now();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function evaluateRound() {
+    cancelAnimationFrame(animationFrameId);
+    setButtonsDisabled(true);
+
+    const isCorrect = currentCommand.check(flags);
+
+    if (isCorrect) {
+      score++;
+      state = "feedback";
+      arena.className = "go";
+      arena.textContent = "성공! 🎉";
+      result.textContent = score + " 회 돌파!";
+      
+      setTimeout(() => {
+        const minTime = isSpeedMode ? 400 : 800;
+        limitTime = Math.max(minTime, limitTime - 120); 
+        nextRound();
+      }, 600);
+    } else {
+      lives--;
+      updateHeartGraphics();
+
+      if (lives > 0) {
+        state = "feedback";
+        arena.className = "wait";
+        arena.textContent = "아차! 기회 감점! 😢";
         
-        // 최고 점수 & 랭킹판 데이터 즉시 교체
-        bestScore = localStorage.getItem('best_score_extreme') || 0;
-        document.getElementById('bestScore').innerText = bestScore;
-        fetchRankings();
+        setTimeout(() => {
+          nextRound();
+        }, 800);
       } else {
-        // 일반 모드로 복귀
-        document.getElementById('bodyBg').className = "bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-500";
-        document.getElementById('gameTitle').innerText = "🔵 청기백기 🔴";
-        document.getElementById('gameTitle').className = "text-4xl font-extrabold text-indigo-600 mb-2 cursor-pointer select-none hover:scale-105 transition-transform";
-        document.getElementById('gameSubtitle').innerText = "깃발을 지시에 맞게 올리거나 내려보세요!";
-        document.getElementById('gameSubtitle').className = "text-gray-500 text-sm mb-6";
+        state = "done";
+        timerBar.style.display = "none";
+        arena.className = "wait";
+        arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
+        result.textContent = `최종 점수: ${score}회 성공`;
         
-        // 최고 점수 & 랭킹판 데이터 즉시 복구
-        bestScore = localStorage.getItem('best_score_normal') || 0;
-        document.getElementById('bestScore').innerText = bestScore;
-        fetchRankings();
-      }
-    }
-
-    // ==========================================
-    // 2. 게임 플레이 코어
-    // ==========================================
-    function startGame() {
-      if (isPlaying) return;
-      isPlaying = true;
-      score = 0;
-      updateScoreDisplay();
-
-      blueFlag = "down";
-      redFlag = "down";
-      updateFlagVisual();
-
-      document.getElementById('startArea').className = "hidden";
-      document.getElementById('controlArea').className = "grid grid-cols-2 gap-4";
-      document.getElementById('rankSubmitArea').className = "hidden";
-
-      nextRound();
-    }
-
-    function nextRound() {
-      if (!isPlaying) return;
-
-      let dynamicTimeLimit = Math.max(800, timeLimit - (score * 120));
-      const commandPool = isExtremeMode ? [...flagCommands, ...extremeCommands] : flagCommands;
-      const randomIndex = Math.floor(Math.random() * commandPool.length);
-      const chosenCommand = commandPool[randomIndex];
-
-      document.getElementById('instruction').innerText = chosenCommand.text;
-
-      currentTask = {
-        blue: chosenCommand.blue,
-        red: chosenCommand.red
-      };
-
-      clearInterval(timer);
-      timeLeft = 100;
-      const intervalTime = dynamicTimeLimit / 100;
-
-      timer = setInterval(() => {
-        timeLeft -= 1;
-        document.getElementById('timerBar').style.width = timeLeft + "%";
-
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          gameOver("⏰ 시간 초과! 조금 더 부지런히 깃발을 지휘해 주세요!");
-        }
-      }, intervalTime);
-    }
-
-    function handleInput(flagColor, action) {
-      if (!isPlaying) return;
-
-      if (flagColor === 'blue') blueFlag = action;
-      if (flagColor === 'red') redFlag = action;
-
-      updateFlagVisual();
-
-      if (blueFlag === currentTask.blue && redFlag === currentTask.red) {
-        clearInterval(timer);
-        score++;
-        updateScoreDisplay();
-        setTimeout(nextRound, 150);
-      }
-    }
-
-    function updateFlagVisual() {
-      const bVisual = document.getElementById('blueFlagVisual');
-      const rVisual = document.getElementById('redFlagVisual');
-
-      if (blueFlag === 'up') {
-        bVisual.style.opacity = "1";
-        bVisual.style.transform = "translateY(-10px) scale(1.1)";
-      } else {
-        bVisual.style.opacity = "0.3";
-        bVisual.style.transform = "translateY(0) scale(1)";
-      }
-
-      if (redFlag === 'up') {
-        rVisual.style.opacity = "1";
-        rVisual.style.transform = "translateY(-10px) scale(1.1)";
-      } else {
-        rVisual.style.opacity = "0.3";
-        rVisual.style.transform = "translateY(0) scale(1)";
-      }
-    }
-
-    function updateScoreDisplay() {
-      document.getElementById('currentScore').innerText = score;
-    }
-
-    function gameOver(reason) {
-      isPlaying = false;
-      clearInterval(timer);
-      document.getElementById('instruction').innerText = "💀 게임 오버 💀\n" + reason;
-
-      document.getElementById('startArea').className = "block";
-      document.getElementById('controlArea').className = "hidden";
-
-      const bestKey = isExtremeMode ? 'best_score_extreme' : 'best_score_normal';
-      let currentBest = localStorage.getItem(bestKey) || 0;
-
-      if (score > currentBest) {
-        localStorage.setItem(bestKey, score);
-        bestScore = score;
-        document.getElementById('bestScore').innerText = score;
-      }
-
-      if (score > 0) {
-        document.getElementById('rankSubmitArea').className = "block bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6 text-left";
-      }
-    }
-
-    // ==========================================
-    // 3. Supabase 연동 (조용한 단일 랭킹판 스왑)
-    // ==========================================
-    async function fetchRankings() {
-      // 모드 상태에 따라 자동으로 테이블 결정
-      const table = isExtremeMode ? 'rankings_extreme' : 'rankings';
-      const rankingListDiv = document.getElementById('rankingList');
-
-      try {
-        const { data, error } = await _supabase
-          .from(table)
-          .select('*')
-          .order('score', { ascending: false })
-          .limit(5);
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          rankingListDiv.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">아직 등록된 랭킹 정보가 없습니다. 첫 챔피언이 되어보세요!</p>`;
-          return;
-        }
-
-        let htmlContent = "";
-        data.forEach((row, idx) => {
-          let badge = `🏅 ${idx + 1}등`;
-          if (idx === 0) badge = "🥇 1등";
-          if (idx === 1) badge = "🥈 2등";
-          if (idx === 2) badge = "🥉 3등";
-
-          // 익스트림 모드일 땐 랭킹 글자도 불타는 붉은색 테두리 적용
-          const bgStyle = idx === 0 
-            ? (isExtremeMode ? 'bg-red-950/40 text-red-200 border border-red-500' : 'bg-amber-100 text-amber-900 border border-amber-300') 
-            : 'bg-white text-gray-700';
-
-          htmlContent += `
-            <div class="flex justify-between items-center px-4 py-2 rounded-xl mb-1 text-sm font-semibold shadow-sm ${bgStyle}">
-              <span>${badge} - ${row.name || "무명기사"}</span>
-              <span class="text-indigo-600 font-extrabold ${isExtremeMode ? 'text-red-400' : ''}">${row.score}점</span>
-            </div>
-          `;
-        });
-
-        rankingListDiv.innerHTML = htmlContent;
-
-      } catch (err) {
-        console.error("랭킹 로드 실패:", err);
-        rankingListDiv.innerHTML = `<p class="text-xs text-red-400 text-center py-4">랭킹 데이터를 불러오는 중 에러 발생</p>`;
-      }
-    }
-
-    async function submitScoreToLeaderboard() {
-      const nameInput = document.getElementById('playerName');
-      const nickname = nameInput.value.trim() || "익명";
-      const table = isExtremeMode ? 'rankings_extreme' : 'rankings';
-
-      try {
-        const { error } = await _supabase
-          .from(table)
-          .insert([{ name: nickname, score: score }]);
-
-        if (error) throw error;
-
-        alert(`🎖️ ${nickname}님의 점수(${score}점)가 등록되었습니다!`);
-        document.getElementById('rankSubmitArea').className = "hidden";
-        nameInput.value = "";
+        lastScore = score;
+        saveBox.style.display = "block";
         
-        fetchRankings(); // 등록 직후 랭킹 즉시 새로고침
-      } catch (err) {
-        console.error("랭킹 등록 오류:", err);
-        alert("등록 중 오류가 발생했습니다.");
+        isSpeedMode = false;
       }
     }
-  </script>
+  }
+
+  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (실제 대시보드의 rankings 테이블로 고정)
+  async function renderRank() {
+    const rankList = document.getElementById("rank");
+    
+    if (!supabaseClient) {
+      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('rankings') 
+        .select('name, score')
+        .order('score', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      rankList.innerHTML = data.length 
+        ? data.map(r => `<li><b>${r.score} 회 성공</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
+    } catch (err) {
+      console.error("랭킹 불러오기 실패:", err);
+      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패 (SQL Editor 자물쇠를 해제해 주세요)</li>";
+    }
+  }
+
+  // ⚡ [Supabase API] 신규 랭킹 등록 (실제 대시보드의 rankings 테이블로 고정)
+  async function saveScore() {
+    const nameInput = document.getElementById("name");
+    const saveBtn = document.getElementById("saveBtn");
+    const name = nameInput.value.trim() || "익명";
+    
+    if (!supabaseClient) return;
+
+    try {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "등록 중...";
+
+      const { error } = await supabaseClient
+        .from('rankings') 
+        .insert([{ name, score: lastScore }]);
+
+      if (error) throw error;
+
+      saveBox.style.display = "none";
+      nameInput.value = "";
+      await renderRank(); 
+    } catch (err) {
+      console.error("점수 등록 실패:", err);
+      alert("데이터 전송 실패! SQL Editor에서 RLS 자물쇠를 해제했는지 확인해 주세요.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "랭킹 등록";
+    }
+  }
+
+  function escapeHtml(str) {
+    if(!str) return "";
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  renderRank();
+</script>
+</body>
+</html>
+    background-image: url('background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    /* 패드 터치 시 텍스트가 파랗게 드래그 차단 */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; }
+  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+  
+  .card { 
+    background: var(--card); 
+    backdrop-filter: blur(6px); 
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    padding: 24px; 
+    width: 100%; 
+    max-width: 440px; 
+    text-align: center; 
+    z-index: 2; 
+  }
+  
+  #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
+
+  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); touch-action: manipulation; }
+  #arena.wait { background: #E05B5B; }
+  #arena.go { background: #27B85B; }
+
+  #timerBar { width: 100%; height: 8px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
+  #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
+
+  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } 
+  .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
+  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .flag-cloth.up { top: 5px; }
+  .flag-cloth.blue { background: #3B82F6; color: white; }
+  .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+
+  .egg-popup {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0);
+    font-size: 34px;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.25);
+  }
+  #egg-blue { color: #1E40AF; } 
+  #egg-white { color: #EA580C; } 
+
+  .egg-popup.show {
+    animation: bounce-up 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes bounce-up {
+    0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
+    30% { transform: translate(-50%, -60px) scale(1.4); opacity: 1; }
+    80% { transform: translate(-50%, -85px) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
+  }
+
+  .speed-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(0, 0, 0, 0.95);
+    color: #FF3B30; 
+    padding: 22px 36px;
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 900;
+    z-index: 9999; 
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
+    border: 3px solid #FF3B30; 
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .speed-popup.show {
+    animation: speed-pop-shake 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes speed-pop-shake {
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
+    15% { transform: translate(-50%, -50%) scale(1.0) rotate(3deg); }
+    20% { transform: translate(-50%, -50%) scale(1.0) rotate(-2deg); }
+    25% { transform: translate(-50%, -50%) scale(1.0) rotate(2deg); }
+    30% { transform: translate(-50%, -50%) scale(1.0) rotate(-1deg); }
+    80% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
+  .hotspot {
+    position: fixed;
+    bottom: 10%;
+    width: 16vw;
+    height: 16vw;
+    min-width: 110px;
+    min-height: 110px;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0); 
+    transition: background 0.2s, transform 0.1s;
+    touch-action: manipulation;
+  }
+  .hotspot:hover {
+    background: rgba(255, 223, 0, 0.04);
+    box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
+  }
+  .hotspot:active {
+    transform: scale(0.9);
+  }
+  #hotspot-drum { left: 5%; }  
+  #hotspot-gong { right: 5%; } 
+
+  .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .control-col { display: flex; flex-direction: column; gap: 8px; }
+  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); touch-action: manipulation; }
+  .control-btn:active { transform: scale(0.95); }
+  .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-blue { background: #3B82F6; color: white; }
+  .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+  .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+
+  .big { font-size: 28px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
+  .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
+  
+  input { 
+    padding: 10px 12px; 
+    border: 2px solid #E5E0D4; 
+    border-radius: 10px; 
+    font-size: 15px; 
+    width: 55%; 
+    margin-right: 6px; 
+    background: rgba(255,255,255,0.9);
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+  button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+  #rankCard { margin-top: 18px; }
+  h2 { font-size: 17px; margin-bottom: 10px; }
+  ol { text-align: left; padding-left: 26px; }
+  li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+  li b { color: var(--accent); }
+  
+  footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+  footer span { transition: color 0.2s, text-shadow 0.2s; }
+  footer span:hover { color: #EF4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+</style>
+
+<script>
+  window.addEventListener('error', function(e) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.height = '100%';
+    errorDiv.style.background = 'rgba(0,0,0,0.93)';
+    errorDiv.style.color = '#ff3b30';
+    errorDiv.style.padding = '30px';
+    errorDiv.style.zIndex = '999999';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.style.fontSize = '14px';
+    errorDiv.style.lineHeight = '1.6';
+    errorDiv.style.overflow = 'auto';
+    errorDiv.innerHTML = `
+      <h2 style="color: #fff; margin-bottom: 15px; border-bottom: 2px solid #ff3b30; padding-bottom: 10px;">🚨 [캠프 디버거] 스크립트 실행 에러 감지!</h2>
+      <p style="font-size: 16px; margin-bottom: 10px;"><b>원인:</b> ${e.message}</p>
+      <p><b>파일 및 위치:</b> ${e.filename} (라인: ${e.lineno}, 열: ${e.colno})</p>
+      <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 15px; color: #ccc; overflow-x: auto; border: 1px solid #444;">${e.error ? e.error.stack : '스택 정보 없음'}</pre>
+    `;
+    document.body.appendChild(errorDiv);
+  });
+</script>
+</head>
+<body>
+  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
+
+  <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
+
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="card">
+    <div id="heartBox">❤️❤️❤️</div>
+
+    <div id="arena">클릭 또는 스페이스바를 눌러 시작</div>
+    
+    <div id="timerBar">
+      <div id="timerProgress"></div>
+    </div>
+
+    <div class="flag-container">
+      <div class="flag-pole-wrapper">
+        <div id="egg-blue" class="egg-popup">북</div>
+        <div class="flag-pole">
+          <div id="flagBlue" class="flag-cloth blue">청기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
+      </div>
+      <div class="flag-pole-wrapper">
+        <div id="egg-white" class="egg-popup">징</div>
+        <div class="flag-pole">
+          <div id="flagWhite" class="flag-cloth white">백기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 (▲ / ▼)</div>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <div class="control-col">
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'up')">🔵 청기 올려<span class="key-hint">W 키</span></button>
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
+      </div>
+      <div class="control-col">
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">▲ 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">▼ 키</span></button>
+      </div>
+    </div>
+
+    <div class="big" id="result"></div>
+    <div id="saveBox" style="display:none">
+      <input id="name" placeholder="이름 입력" maxlength="8">
+      <button class="save-btn" id="saveBtn" onclick="saveScore()">랭킹 등록</button>
+    </div>
+    <p class="hint">스페이스바를 눌러 게임을 시작하고 빠르게 대처하세요!</p>
+  </div>
+
+  <div class="card" id="rankCard">
+    <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
+    <ol id="rank"></ol>
+  </div>
+
+  <footer id="footer"></footer>
+
+<script>
+  document.documentElement.style.setProperty("--accent", CONFIG.accent);
+  document.getElementById("title").textContent = CONFIG.title;
+  document.getElementById("subtitle").textContent = CONFIG.subtitle;
+  
+  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
+  document.title = CONFIG.title;
+  
+  if(CONFIG.bgImage) {
+    document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
+  }
+
+  let supabaseClient = null;
+  try {
+    const isSupabaseLibraryLoaded = (typeof window.supabase !== 'undefined');
+    const isConfigValid = CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" && CONFIG.supabaseUrl.startsWith("http");
+
+    if (isSupabaseLibraryLoaded && isConfigValid) {
+      supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+      console.log("Supabase 클라우드가 안전하게 연결되었습니다.");
+    } else {
+      console.warn("Supabase가 연결되지 않았습니다. 오프라인 모드로 실행됩니다.");
+    }
+  } catch (err) {
+    console.error("Supabase 엔진 초기화 실패. 오프라인 플레이로 우회합니다:", err);
+  }
+
+  const arena = document.getElementById("arena");
+  const result = document.getElementById("result");
+  const saveBox = document.getElementById("saveBox");
+  const timerBar = document.getElementById("timerBar");
+  const timerProgress = document.getElementById("timerProgress");
+  const heartBox = document.getElementById("heartBox");
+  
+  let state = "idle";
+  let score = 0;
+  let lastScore = 0;
+  let lives = 3; 
+  
+  let flags = { blue: "down", white: "down" };
+
+  let currentCommand = null;
+  let initialLimitTime = 2500; 
+  let limitTime = 2500;
+  let timeLeft = 0;
+  let lastFrameTime = 0;
+  let animationFrameId = null;
+
+  let isSpeedMode = false;
+
+  const COMMANDS = [
+    { text: "청기 올려!", check: (f) => f.blue === "up" && f.white === "down" },
+    { text: "백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "둘 다 올려!", check: (f) => f.blue === "up" && f.white === "up" },
+    { text: "둘 다 내려!", check: (f) => f.blue === "down" && f.white === "down" },
+    { text: "청기 내리고 백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
+  ];
+
+  document.getElementById("team-click").addEventListener("click", () => {
+    isSpeedMode = true; 
+
+    const speedPopup = document.getElementById("speed-popup");
+    speedPopup.classList.remove("show");
+    void speedPopup.offsetWidth; 
+    speedPopup.classList.add("show");
+
+    if (state === "playing") {
+      limitTime = limitTime / 2;
+      timeLeft = timeLeft / 2;
+    }
+  });
+
+  function playEasterEgg(side, text) {
+    const eggText = document.getElementById(`egg-${side}`);
+    eggText.textContent = text;
+    
+    eggText.classList.remove("show");
+    void eggText.offsetWidth; 
+    eggText.classList.add("show");
+
+    const flagId = side === "blue" ? "flagBlue" : "flagWhite";
+    const flagEl = document.getElementById(flagId);
+    flagEl.style.transform = "scale(1.2) rotate(15deg)";
+    setTimeout(() => {
+      flagEl.style.transform = "";
+    }, 150);
+  }
+
+  function updateHeartGraphics() {
+    heartBox.textContent = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
+  }
+
+  function setButtonsDisabled(disabled) {
+    document.querySelectorAll(".control-btn").forEach(btn => btn.disabled = disabled);
+  }
+
+  setButtonsDisabled(true);
+
+  function updateFlagGraphics() {
+    const flagBlue = document.getElementById("flagBlue");
+    const flagWhite = document.getElementById("flagWhite");
+
+    if (flags.blue === "up") flagBlue.classList.add("up");
+    else flagBlue.classList.remove("up");
+
+    if (flags.white === "up") flagWhite.classList.add("up");
+    else flagWhite.classList.remove("up");
+  }
+
+  function controlFlag(color, action) {
+    if (state !== "playing") return;
+    flags[color] = action;
+    updateFlagGraphics();
+  }
+
+  function triggerGameStart() {
+    score = 0;
+    lives = 3; 
+    
+    limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+    
+    flags = { blue: "down", white: "down" };
+    updateFlagGraphics();
+    updateHeartGraphics();
+    
+    result.textContent = "";
+    saveBox.style.display = "none";
+    timerBar.style.display = "block";
+    heartBox.style.display = "block";
+    
+    nextRound();
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement.tagName === "INPUT") return;
+
+    if (e.key === " ") {
+      if (state === "idle" || state === "done") {
+        e.preventDefault(); 
+        triggerGameStart();
+        return;
+      }
+    }
+
+    if (state !== "playing") return;
+    
+    if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
+    if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
+    
+    if (e.key === "ArrowUp") {
+      e.preventDefault(); 
+      controlFlag("white", "up");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      controlFlag("white", "down");
+    }
+  });
+
+  function gameLoop(now) {
+    if (state !== "playing") return;
+
+    const dt = now - lastFrameTime;
+    lastFrameTime = now;
+    timeLeft -= dt;
+
+    const percent = Math.max(0, (timeLeft / limitTime) * 100);
+    timerProgress.style.width = percent + "%";
+
+    if (timeLeft <= 0) {
+      evaluateRound();
+    } else {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  arena.addEventListener("click", () => {
+    if (state === "idle" || state === "done") {
+      triggerGameStart();
+    }
+  });
+
+  function nextRound() {
+    state = "playing";
+    arena.className = "";
+    setButtonsDisabled(false);
+    
+    currentCommand = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
+    arena.textContent = currentCommand.text;
+
+    timeLeft = limitTime;
+    lastFrameTime = performance.now();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function evaluateRound() {
+    cancelAnimationFrame(animationFrameId);
+    setButtonsDisabled(true);
+
+    const isCorrect = currentCommand.check(flags);
+
+    if (isCorrect) {
+      score++;
+      state = "feedback";
+      arena.className = "go";
+      arena.textContent = "성공! 🎉";
+      result.textContent = score + " 회 돌파!";
+      
+      setTimeout(() => {
+        const minTime = isSpeedMode ? 400 : 800;
+        limitTime = Math.max(minTime, limitTime - 120); 
+        nextRound();
+      }, 600);
+    } else {
+      lives--;
+      updateHeartGraphics();
+
+      if (lives > 0) {
+        state = "feedback";
+        arena.className = "wait";
+        arena.textContent = "아차! 기회 감점! 😢";
+        
+        setTimeout(() => {
+          nextRound();
+        }, 800);
+      } else {
+        state = "done";
+        timerBar.style.display = "none";
+        arena.className = "wait";
+        arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
+        result.textContent = `최종 점수: ${score}회 성공`;
+        
+        lastScore = score;
+        saveBox.style.display = "block";
+        
+        isSpeedMode = false;
+      }
+    }
+  }
+
+  async function renderRank() {
+    const rankList = document.getElementById("rank");
+    
+    if (!supabaseClient) {
+      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('rankings') 
+        .select('name, score')
+        .order('score', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      rankList.innerHTML = data.length 
+        ? data.map(r => `<li><b>${r.score} 회 성공</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
+    } catch (err) {
+      console.error("랭킹 불러오기 실패:", err);
+      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패</li>";
+    }
+  }
+
+  async function saveScore() {
+    const nameInput = document.getElementById("name");
+    const saveBtn = document.getElementById("saveBtn");
+    const name = nameInput.value.trim() || "익명";
+    
+    if (!supabaseClient) return;
+
+    try {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "등록 중...";
+
+      const { error } = await supabaseClient
+        .from('rankings') 
+        .insert([{ name, score: lastScore }]);
+
+      if (error) throw error;
+
+      saveBox.style.display = "none";
+      nameInput.value = "";
+      await renderRank(); 
+    } catch (err) {
+      console.error("점수 등록 실패:", err);
+      alert("데이터 전송 실패!");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "랭킹 등록";
+    }
+  }
+
+  function escapeHtml(str) {
+    if(!str) return "";
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  renderRank();
+</script>
+</body>
+</html>    position: relative; 
+    overflow-x: hidden;
+    
+    background-color: #f1f5f9; 
+    background-image: url('background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; }
+  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }
+  
+  .card { 
+    background: var(--card); 
+    backdrop-filter: blur(6px); 
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+    padding: 24px; 
+    width: 100%; 
+    max-width: 440px; 
+    text-align: center; 
+    z-index: 2; 
+  }
+  
+  #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
+
+  #arena { height: 110px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #fff; cursor: pointer; user-select: none; background: var(--accent); transition: background .1s; padding: 10px; line-height: 1.4; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); }
+  #arena.wait { background: #E05B5B; }
+  #arena.go { background: #27B85B; }
+
+  #timerBar { width: 100%; height: 8px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
+  #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
+
+  .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } 
+  .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
+  .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .flag-cloth.up { top: 5px; }
+  .flag-cloth.blue { background: #3B82F6; color: white; }
+  .flag-cloth.white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+
+  .egg-popup {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0);
+    font-size: 34px;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.25);
+  }
+  #egg-blue { color: #1E40AF; } 
+  #egg-white { color: #EA580C; } 
+
+  .egg-popup.show {
+    animation: bounce-up 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes bounce-up {
+    0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
+    30% { transform: translate(-50%, -60px) scale(1.4); opacity: 1; }
+    80% { transform: translate(-50%, -85px) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; }
+  }
+
+  .speed-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(0, 0, 0, 0.95);
+    color: #FF3B30; 
+    padding: 22px 36px;
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 900;
+    z-index: 9999; 
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
+    border: 3px solid #FF3B30; 
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .speed-popup.show {
+    animation: speed-pop-shake 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes speed-pop-shake {
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1.15) rotate(-3deg); opacity: 1; }
+    15% { transform: translate(-50%, -50%) scale(1.0) rotate(3deg); }
+    20% { transform: translate(-50%, -50%) scale(1.0) rotate(-2deg); }
+    25% { transform: translate(-50%, -50%) scale(1.0) rotate(2deg); }
+    30% { transform: translate(-50%, -50%) scale(1.0) rotate(-1deg); }
+    80% { transform: translate(-50%, -50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  }
+
+  .hotspot {
+    position: fixed;
+    bottom: 10%;
+    width: 16vw;
+    height: 16vw;
+    min-width: 110px;
+    min-height: 110px;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0); 
+    transition: background 0.2s, transform 0.1s;
+  }
+  .hotspot:hover {
+    background: rgba(255, 223, 0, 0.04);
+    box-shadow: 0 0 30px rgba(255, 223, 0, 0.15);
+  }
+  .hotspot:active {
+    transform: scale(0.9);
+  }
+  #hotspot-drum { left: 5%; }  
+  #hotspot-gong { right: 5%; } 
+
+  .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .control-col { display: flex; flex-direction: column; gap: 8px; }
+  .control-btn { padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s, opacity 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .control-btn:active { transform: scale(0.95); }
+  .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-blue { background: #3B82F6; color: white; }
+  .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
+  .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+
+  .big { font-size: 28px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
+  .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
+  input { padding: 10px 12px; border: 2px solid #E5E0D4; border-radius: 10px; font-size: 15px; width: 55%; margin-right: 6px; background: rgba(255,255,255,0.9); }
+  button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; }
+  #rankCard { margin-top: 18px; }
+  h2 { font-size: 17px; margin-bottom: 10px; }
+  ol { text-align: left; padding-left: 26px; }
+  li { padding: 5px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+  li b { color: var(--accent); }
+  
+  footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+  footer span { transition: color 0.2s, text-shadow 0.2s; }
+  footer span:hover { color: #EF4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+</style>
+
+<script>
+  window.addEventListener('error', function(e) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.height = '100%';
+    errorDiv.style.background = 'rgba(0,0,0,0.93)';
+    errorDiv.style.color = '#ff3b30';
+    errorDiv.style.padding = '30px';
+    errorDiv.style.zIndex = '999999';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.style.fontSize = '14px';
+    errorDiv.style.lineHeight = '1.6';
+    errorDiv.style.overflow = 'auto';
+    errorDiv.innerHTML = `
+      <h2 style="color: #fff; margin-bottom: 15px; border-bottom: 2px solid #ff3b30; padding-bottom: 10px;">🚨 [캠프 디버거] 스크립트 실행 에러 감지!</h2>
+      <p style="font-size: 16px; margin-bottom: 10px;"><b>원인:</b> ${e.message}</p>
+      <p><b>파일 및 위치:</b> ${e.filename} (라인: ${e.lineno}, 열: ${e.colno})</p>
+      <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 15px; color: #ccc; overflow-x: auto; border: 1px solid #444;">${e.error ? e.error.stack : '스택 정보 없음'}</pre>
+    `;
+    document.body.appendChild(errorDiv);
+  });
+</script>
+</head>
+<body>
+  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
+  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="pushEasterEgg('white', '징🔔')"></div>
+
+  <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
+
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="card">
+    <div id="heartBox">❤️❤️❤️</div>
+
+    <div id="arena">클릭 또는 스페이스바를 눌러 시작</div>
+    
+    <div id="timerBar">
+      <div id="timerProgress"></div>
+    </div>
+
+    <div class="flag-container">
+      <div class="flag-pole-wrapper">
+        <div id="egg-blue" class="egg-popup">북</div>
+        <div class="flag-pole">
+          <div id="flagBlue" class="flag-cloth blue">청기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
+      </div>
+      <div class="flag-pole-wrapper">
+        <div id="egg-white" class="egg-popup">징</div>
+        <div class="flag-pole">
+          <div id="flagWhite" class="flag-cloth white">백기</div>
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 (▲ / ▼)</div>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <div class="control-col">
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'up')">🔵 청기 올려<span class="key-hint">W 키</span></button>
+        <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
+      </div>
+      <div class="control-col">
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">▲ 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">▼ 키</span></button>
+      </div>
+    </div>
+
+    <div class="big" id="result"></div>
+    <div id="saveBox" style="display:none">
+      <input id="name" placeholder="이름 입력" maxlength="8">
+      <button class="save-btn" id="saveBtn" onclick="saveScore()">랭킹 등록</button>
+    </div>
+    <p class="hint">스페이스바를 눌러 게임을 시작하고 빠르게 대처하세요!</p>
+  </div>
+
+  <div class="card" id="rankCard">
+    <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
+    <ol id="rank"></ol>
+  </div>
+
+  <footer id="footer"></footer>
+
+<script>
+  // ---- CONFIG 적용 ----
+  document.documentElement.style.setProperty("--accent", CONFIG.accent);
+  document.getElementById("title").textContent = CONFIG.title;
+  document.getElementById("subtitle").textContent = CONFIG.subtitle;
+  
+  document.getElementById("footer").innerHTML = `<span id="team-click" style="cursor:pointer;">${CONFIG.team}</span> 제작 · 개발자 체험 캠프`;
+  document.title = CONFIG.title;
+  
+  if(CONFIG.bgImage) {
+    document.body.style.backgroundImage = `url('${CONFIG.bgImage}')`;
+  }
+
+  let supabaseClient = null;
+  try {
+    const isSupabaseLibraryLoaded = (typeof window.supabase !== 'undefined');
+    const isConfigValid = CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" && CONFIG.supabaseUrl.startsWith("http");
+
+    if (isSupabaseLibraryLoaded && isConfigValid) {
+      supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+      console.log("Supabase 클라우드가 안전하게 연결되었습니다.");
+    } else {
+      console.warn("Supabase가 연결되지 않았습니다. 오프라인 모드로 실행됩니다.");
+    }
+  } catch (err) {
+    console.error("Supabase 엔진 초기화 실패. 오프라인 플레이로 우회합니다:", err);
+  }
+
+  const arena = document.getElementById("arena");
+  const result = document.getElementById("result");
+  const saveBox = document.getElementById("saveBox");
+  const timerBar = document.getElementById("timerBar");
+  const timerProgress = document.getElementById("timerProgress");
+  const heartBox = document.getElementById("heartBox");
+  
+  let state = "idle";
+  let score = 0;
+  let lastScore = 0;
+  let lives = 3; 
+  
+  let flags = { blue: "down", white: "down" };
+
+  let currentCommand = null;
+  let initialLimitTime = 2500; 
+  let limitTime = 2500;
+  let timeLeft = 0;
+  let lastFrameTime = 0;
+  let animationFrameId = null;
+
+  let isSpeedMode = false;
+
+  const COMMANDS = [
+    { text: "청기 올려!", check: (f) => f.blue === "up" && f.white === "down" },
+    { text: "백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "둘 다 올려!", check: (f) => f.blue === "up" && f.white === "up" },
+    { text: "둘 다 내려!", check: (f) => f.blue === "down" && f.white === "down" },
+    { text: "청기 내리고 백기 올려!", check: (f) => f.blue === "down" && f.white === "up" },
+    { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
+  ];
+
+  document.getElementById("team-click").addEventListener("click", () => {
+    isSpeedMode = true; 
+
+    const speedPopup = document.getElementById("speed-popup");
+    speedPopup.classList.remove("show");
+    void speedPopup.offsetWidth; 
+    speedPopup.classList.add("show");
+
+    if (state === "playing") {
+      limitTime = limitTime / 2;
+      timeLeft = timeLeft / 2;
+    }
+  });
+
+  function playEasterEgg(side, text) {
+    const eggText = document.getElementById(`egg-${side}`);
+    eggText.textContent = text;
+    
+    eggText.classList.remove("show");
+    void eggText.offsetWidth; 
+    eggText.classList.add("show");
+
+    const flagId = side === "blue" ? "flagBlue" : "flagWhite";
+    const flagEl = document.getElementById(flagId);
+    flagEl.style.transform = "scale(1.2) rotate(15deg)";
+    setTimeout(() => {
+      flagEl.style.transform = "";
+    }, 150);
+  }
+
+  function updateHeartGraphics() {
+    heartBox.textContent = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
+  }
+
+  function setButtonsDisabled(disabled) {
+    document.querySelectorAll(".control-btn").forEach(btn => btn.disabled = disabled);
+  }
+
+  setButtonsDisabled(true);
+
+  function updateFlagGraphics() {
+    const flagBlue = document.getElementById("flagBlue");
+    const flagWhite = document.getElementById("flagWhite");
+
+    if (flags.blue === "up") flagBlue.classList.add("up");
+    else flagBlue.classList.remove("up");
+
+    if (flags.white === "up") flagWhite.classList.add("up");
+    else flagWhite.classList.remove("up");
+  }
+
+  function controlFlag(color, action) {
+    if (state !== "playing") return;
+    flags[color] = action;
+    updateFlagGraphics();
+  }
+
+  function triggerGameStart() {
+    score = 0;
+    lives = 3; 
+    
+    limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+    
+    flags = { blue: "down", white: "down" };
+    updateFlagGraphics();
+    updateHeartGraphics();
+    
+    result.textContent = "";
+    saveBox.style.display = "none";
+    timerBar.style.display = "block";
+    heartBox.style.display = "block";
+    
+    nextRound();
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement.tagName === "INPUT") return;
+
+    if (e.key === " ") {
+      if (state === "idle" || state === "done") {
+        e.preventDefault(); 
+        triggerGameStart();
+        return;
+      }
+    }
+
+    if (state !== "playing") return;
+    
+    if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
+    if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
+    
+    if (e.key === "ArrowUp") {
+      e.preventDefault(); 
+      controlFlag("white", "up");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      controlFlag("white", "down");
+    }
+  });
+
+  function gameLoop(now) {
+    if (state !== "playing") return;
+
+    const dt = now - lastFrameTime;
+    lastFrameTime = now;
+    timeLeft -= dt;
+
+    const percent = Math.max(0, (timeLeft / limitTime) * 100);
+    timerProgress.style.width = percent + "%";
+
+    if (timeLeft <= 0) {
+      evaluateRound();
+    } else {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  arena.addEventListener("click", () => {
+    if (state === "idle" || state === "done") {
+      triggerGameStart();
+    }
+  });
+
+  function nextRound() {
+    state = "playing";
+    arena.className = "";
+    setButtonsDisabled(false);
+    
+    currentCommand = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
+    arena.textContent = currentCommand.text;
+
+    timeLeft = limitTime;
+    lastFrameTime = performance.now();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function evaluateRound() {
+    cancelAnimationFrame(animationFrameId);
+    setButtonsDisabled(true);
+
+    const isCorrect = currentCommand.check(flags);
+
+    if (isCorrect) {
+      score++;
+      state = "feedback";
+      arena.className = "go";
+      arena.textContent = "성공! 🎉";
+      result.textContent = score + " 회 돌파!";
+      
+      setTimeout(() => {
+        const minTime = isSpeedMode ? 400 : 800;
+        limitTime = Math.max(minTime, limitTime - 120); 
+        nextRound();
+      }, 600);
+    } else {
+      lives--;
+      updateHeartGraphics();
+
+      if (lives > 0) {
+        state = "feedback";
+        arena.className = "wait";
+        arena.textContent = "아차! 기회 감점! 😢";
+        
+        setTimeout(() => {
+          nextRound();
+        }, 800);
+      } else {
+        state = "done";
+        timerBar.style.display = "none";
+        arena.className = "wait";
+        arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
+        result.textContent = `최종 점수: ${score}회 성공`;
+        
+        lastScore = score;
+        saveBox.style.display = "block";
+        
+        isSpeedMode = false;
+      }
+    }
+  }
+
+  // ⚡ [Supabase API] 랭킹 실시간 가져오기 (실제 대시보드의 rankings 테이블로 고정)
+  async function renderRank() {
+    const rankList = document.getElementById("rank");
+    
+    if (!supabaseClient) {
+      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('rankings') // ➡️ 선배님의 테이블 이름인 'rankings'로 정렬!
+        .select('name, score')
+        .order('score', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      rankList.innerHTML = data.length 
+        ? data.map(r => `<li><b>${r.score} 회 성공</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>아직 데이터베이스에 기록이 없어요. 1등에 도전!</li>";
+    } catch (err) {
+      console.error("랭킹 불러오기 실패:", err);
+      rankList.innerHTML = "<li>⚠️ 랭킹 로드 실패 (SQL Editor 자물쇠를 해제해 주세요)</li>";
+    }
+  }
+
+  // ⚡ [Supabase API] 신규 랭킹 등록 (실제 대시보드의 rankings 테이블로 고정)
+  async function saveScore() {
+    const nameInput = document.getElementById("name");
+    const saveBtn = document.getElementById("saveBtn");
+    const name = nameInput.value.trim() || "익명";
+    
+    if (!supabaseClient) return;
+
+    try {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "등록 중...";
+
+      const { error } = await supabaseClient
+        .from('rankings') // ➡️ 선배님의 테이블 이름인 'rankings'로 정렬!
+        .insert([{ name, score: lastScore }]);
+
+      if (error) throw error;
+
+      saveBox.style.display = "none";
+      nameInput.value = "";
+      await renderRank(); 
+    } catch (err) {
+      console.error("점수 등록 실패:", err);
+      alert("데이터 전송 실패! SQL Editor에서 RLS 자물쇠를 해제했는지 확인해 주세요.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "랭킹 등록";
+    }
+  }
+
+  function escapeHtml(str) {
+    if(!str) return "";
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  renderRank();
+</script>
 </body>
 </html>
