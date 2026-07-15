@@ -197,18 +197,15 @@ const CONFIG = {
   }
   button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
   
-  /* 🏆 개선된 명예의 전당 스타일 */
   #rankCard { margin-top: 0; padding: 16px 20px; }
   #rankCard h2 { font-size: 18px; margin-bottom: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
   #rankCard h2::after { content: '🔽'; font-size: 12px; transition: transform 0.3s; }
   #rankCard.open h2::after { transform: rotate(180deg); }
 
-  /* 미니 랭킹 (접혀있을 때 노출) */
   .mini-rank { margin-top: 10px; font-size: 14px; color: var(--sub); font-weight: bold; background: rgba(0,0,0,0.03); padding: 6px; border-radius: 8px; }
   .mini-rank b { color: var(--accent); }
   .open .mini-rank { display: none; }
 
-  /* 💡 모드별 전용 탭 메뉴 스타일 */
   .rank-tabs {
     display: flex;
     justify-content: space-around;
@@ -231,7 +228,6 @@ const CONFIG = {
     border-bottom-color: var(--accent);
   }
 
-  /* 탭 콘텐츠 슬라이드 효과 */
   .rank-content { 
     max-height: 0; 
     overflow: hidden; 
@@ -250,10 +246,10 @@ const CONFIG = {
     padding: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     text-align: left;
-    display: none; /* 기본 비활성화 */
+    display: none; 
   }
   .rank-column.active {
-    display: block; /* 활성화된 것만 표시 */
+    display: block; 
   }
   .rank-column ol {
     padding-left: 20px;
@@ -330,7 +326,7 @@ const CONFIG = {
         <div class="flag-pole">
           <div id="flagWhite" class="flag-cloth white">백기</div>
         </div>
-        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 <span class="key-hint">I 올려</span> <span class="key-hint">K 내려</span></div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 <span class="key-hint">Enter 올려</span> <span class="key-hint">Shift 내려</span></div>
       </div>
     </div>
 
@@ -340,8 +336,8 @@ const CONFIG = {
         <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
       </div>
       <div class="control-col">
-        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">I 키</span></button>
-        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">K 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">Enter 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">Shift 키</span></button>
       </div>
     </div>
 
@@ -430,10 +426,9 @@ const CONFIG = {
   let isSpeedMode = false;
   let isExtremeMode = false; 
 
-  let gameModePlayed = "normal"; // 현재 저장 타겟 모드
-  let activeTab = "normal";      // 현재 화면에 띄우고 있는 랭킹 탭
+  let gameModePlayed = "normal"; 
+  let activeTab = "normal";      
 
-  // 랭킹 데이터를 실시간으로 보관하는 캐시 (미니 랭킹 1위 판정용)
   let cachedNormalData = [];
   let cachedHardData = [];
   let cachedExtremeData = [];
@@ -455,15 +450,12 @@ const CONFIG = {
     card.classList.toggle('open');
   }
 
-  // 💡 수동으로 탭을 스위칭하는 함수
   function switchRankTab(mode) {
     activeTab = mode;
     
-    // 탭 헤더 활성화 상태 리셋
     document.querySelectorAll('.rank-tab').forEach(tab => tab.classList.remove('active'));
     document.getElementById(`tab-${mode}`).classList.add('active');
     
-    // 탭 콘텐츠 패널 활성화 상태 리셋
     document.querySelectorAll('.rank-column').forEach(col => col.classList.remove('active'));
     document.getElementById(`panel-${mode}`).classList.add('active');
     
@@ -474,7 +466,7 @@ const CONFIG = {
     recordCheatStep("speed");
     if (isExtremeMode) return; 
     isSpeedMode = true; 
-    switchRankTab('hard'); // 💡 하드 모드 랭킹으로 즉시 스위칭!
+    switchRankTab('hard'); 
     const speedPopup = document.getElementById("speed-popup");
     speedPopup.classList.remove("show");
     void speedPopup.offsetWidth; 
@@ -498,7 +490,7 @@ const CONFIG = {
   function triggerExtremeMode() {
     isExtremeMode = true;
     isSpeedMode = false; 
-    switchRankTab('extreme'); // 💡 익스트림 모드 랭킹으로 즉시 스위칭!
+    switchRankTab('extreme'); 
     document.documentElement.style.setProperty("--accent", "#EF4444"); 
     document.getElementById("title").textContent = "🚨 익스트림 청기백기 🚨";
     document.getElementById("title").style.color = "#EF4444";
@@ -594,6 +586,7 @@ const CONFIG = {
     nextRound();
   }
 
+  // 💡 [수정된 키보드 이벤트 리스너]
   window.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === "INPUT") return;
     if (e.key === " ") {
@@ -605,10 +598,21 @@ const CONFIG = {
     }
     if (state !== "playing") return;
     
+    // 청기 올리기 / 내리기 (W, S)
     if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
     if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
-    if (e.key.toLowerCase() === "i") controlFlag("white", "up"); 
-    if (e.key.toLowerCase() === "k") controlFlag("white", "down"); 
+    
+    // 백기 올리기 (Enter)
+    if (e.key === "Enter") {
+      e.preventDefault(); 
+      controlFlag("white", "up");
+    }
+    
+    // 💡 백기 내리기 (왼쪽/오른쪽 어떤 Shift든 감지!)
+    if (e.key === "Shift") {
+      e.preventDefault(); 
+      controlFlag("white", "down");
+    }
   });
 
   function gameLoop(now) {
@@ -686,7 +690,6 @@ const CONFIG = {
     }
   }
 
-  // 💡 3가지 모드별 데이터 동적 불러오기 로직
   async function renderRank() {
     const rankNormalList = document.getElementById("rankNormal");
     const rankHardList = document.getElementById("rankHard");
@@ -702,7 +705,6 @@ const CONFIG = {
     }
 
     try {
-      // 테이블이 존재하지 않을 상황을 고려한 안전 조회 함수
       const fetchSafeTable = async (tableName) => {
         try {
           const { data, error } = await supabaseClient
@@ -721,7 +723,7 @@ const CONFIG = {
       const [normalData, extremeData, hardData] = await Promise.all([
         fetchSafeTable('rankings'),
         fetchSafeTable('rankings_extreme'),
-        fetchSafeTable('rankings_hard') // 💡 신규 생성할 하드 전용 테이블
+        fetchSafeTable('rankings_hard') 
       ]);
 
       cachedNormalData = normalData;
@@ -736,7 +738,6 @@ const CONFIG = {
         ? extremeData.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
         : "<li>기록이 없습니다.</li>";
 
-      // 만약 rankings_hard가 존재하지 않는 경우 가이드 문구 노출
       rankHardList.innerHTML = hardData.length 
         ? hardData.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
         : "<li>기록이 없거나 테이블이 미설정되었습니다.</li>";
@@ -752,7 +753,6 @@ const CONFIG = {
     }
   }
 
-  // 💡 선택된 탭에 매핑된 미니 랭킹 1위 정보 표시
   function updateMiniRankText() {
     const miniRank = document.getElementById("miniRank");
     let targetData = cachedNormalData;
@@ -791,7 +791,6 @@ const CONFIG = {
         .insert([{ name, score: lastScore }]);
 
       if (error) {
-        // 💡 안전장치: rankings_hard 테이블이 없는 경우 일반 테이블에 (하드) 명칭을 달아서 저장 시켜 뻗지 않게 조치
         if (gameModePlayed === "hard") {
           console.warn("rankings_hard 테이블이 확인되지 않아 rankings(기본) 테이블로 우회 등록합니다.");
           await supabaseClient.from('rankings').insert([{ name: `${name} (하드)`, score: lastScore }]);
@@ -804,7 +803,6 @@ const CONFIG = {
       nameInput.value = "";
       await renderRank(); 
       
-      // 💡 저장 후에는 본인이 플레이했던 그 모드의 탭을 강제 활성화 시켜 바로 등재 확인 가능케 함
       switchRankTab(gameModePlayed);
       if (!document.getElementById('rankCard').classList.contains('open')) {
         toggleRank();
