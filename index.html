@@ -174,7 +174,7 @@ const CONFIG = {
     100% { background-color: #450a0a; } /* 경고 빨간색 */
   }
 
-  /* 💡 핫스팟 영역 스타일 가이드 */
+  /* 💡 핫스팟 영역 스타일 가이드 (구조/기능 보존, 회색 영역 표시만 완벽 투명화) */
   .hotspot {
     position: fixed;
     bottom: 8%;
@@ -188,25 +188,27 @@ const CONFIG = {
     cursor: pointer;
     z-index: 999; 
     
-    background: rgba(0, 0, 0, 0.06); 
-    border: 2px dashed rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    /* 🔴 영역 표시(회색 원, 테두리, 그림자)를 완전히 제거하여 숨김 */
+    background: transparent; 
+    border: none;
+    box-shadow: none;
 
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
     font-weight: bold;
-    color: rgba(0, 0, 0, 0.45);
+    color: transparent;
     
     transition: all 0.2s;
     touch-action: manipulation;
   }
+  /* 🔴 호버 시 발생하는 노란색 하이라이트 효과도 숨김 */
   .hotspot:hover {
-    background: rgba(255, 223, 0, 0.12);
-    border-color: rgba(255, 223, 0, 0.5);
-    color: rgba(0, 0, 0, 0.7);
-    box-shadow: 0 0 30px rgba(255, 223, 0, 0.25);
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+    box-shadow: none;
   }
   .hotspot:active {
     transform: scale(0.9);
