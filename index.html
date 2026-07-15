@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>청기백기 게임</title>
+<title>천하제일 청기백기</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const CONFIG = {
@@ -39,13 +39,12 @@ const CONFIG = {
     background-repeat: no-repeat;
     background-attachment: fixed;
 
-    /* 패드 연타 시 텍스트 파란색 블록 선택 차단 */
     -webkit-user-select: none;
     user-select: none;
   }
 
   h1 { font-size: 32px; margin-top: 8px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); color: #1e293b; transition: all 0.3s; }
-  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 20px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); transition: all 0.3s; }
+  .subtitle { color: #475569; font-weight: bold; margin: 6px 0 10px; text-shadow: 0 1px 3px rgba(255,255,255,0.8); transition: all 0.3s; }
   
   .card { 
     background: var(--card); 
@@ -59,6 +58,7 @@ const CONFIG = {
     max-width: 440px; 
     text-align: center; 
     z-index: 2; 
+    margin-bottom: 16px;
   }
   
   #heartBox { font-size: 24px; margin-bottom: 12px; letter-spacing: 4px; display: none; }
@@ -71,7 +71,7 @@ const CONFIG = {
   #timerProgress { width: 100%; height: 100%; background: var(--accent); transition: width 0.05s linear; }
 
   .flag-container { display: flex; justify-content: space-around; align-items: flex-end; height: 120px; margin: 15px 0; background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px; }
-  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; } 
+  .flag-pole-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; } 
   .flag-pole { width: 6px; height: 75px; background: #8E8272; position: relative; border-radius: 3px; }
   .flag-cloth { width: 46px; height: 32px; position: absolute; left: 6px; top: 43px; transition: top 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   .flag-cloth.up { top: 5px; }
@@ -137,7 +137,6 @@ const CONFIG = {
     100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
   }
 
-  /* 🚨 익스트림 모드 경보 팝업 스타일 */
   .extreme-popup {
     position: fixed;
     top: 50%;
@@ -168,53 +167,10 @@ const CONFIG = {
     100% { transform: translate(-48%, -50%) scale(1) rotate(1deg); }
   }
 
-  /* 🚨 익스트림 전용 배경 사이렌 애니메이션 */
   @keyframes extreme-flash {
-    0% { background-color: #111827; } /* 다크 그레이 */
-    100% { background-color: #450a0a; } /* 경고 빨간색 */
+    0% { background-color: #111827; } 
+    100% { background-color: #450a0a; } 
   }
-
-  /* 💡 핫스팟 영역 스타일 가이드 (구조/기능 보존, 회색 영역 표시만 완벽 투명화) */
-  .hotspot {
-    position: fixed;
-    bottom: 8%;
-    width: 18vw;
-    height: 18vw;
-    min-width: 120px;
-    min-height: 120px;
-    max-width: 180px;
-    max-height: 180px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 999; 
-    
-    /* 🔴 영역 표시(회색 원, 테두리, 그림자)를 완전히 제거하여 숨김 */
-    background: transparent; 
-    border: none;
-    box-shadow: none;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: bold;
-    color: transparent;
-    
-    transition: all 0.2s;
-    touch-action: manipulation;
-  }
-  /* 🔴 호버 시 발생하는 노란색 하이라이트 효과도 숨김 */
-  .hotspot:hover {
-    background: transparent;
-    border-color: transparent;
-    color: transparent;
-    box-shadow: none;
-  }
-  .hotspot:active {
-    transform: scale(0.9);
-  }
-  #hotspot-drum { left: 5%; }  
-  #hotspot-gong { right: 5%; } 
 
   .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .control-col { display: flex; flex-direction: column; gap: 8px; }
@@ -223,7 +179,7 @@ const CONFIG = {
   .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-blue { background: #3B82F6; color: white; }
   .btn-white { background: #ffffff; color: #22335C; border: 1px solid #CBD5E1; }
-  .key-hint { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+  .key-hint { font-size: 10px; opacity: 0.8; margin-top: 3px; font-family: monospace; background: rgba(0,0,0,0.1); padding: 1px 4px; border-radius: 3px; }
 
   .big { font-size: 28px; font-weight: 800; color: var(--accent); margin: 14px 0 4px; }
   .hint { color: var(--sub); font-size: 13px; margin-top: 10px; }
@@ -241,34 +197,69 @@ const CONFIG = {
   }
   button.save-btn { padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
   
-  /* 🏆 랭킹 그리드 레이아웃 스타일 추가 */
-  #rankCard { margin-top: 18px; }
-  h2 { font-size: 17px; margin-bottom: 15px; }
-  .rank-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 5px;
+  /* 🏆 개선된 명예의 전당 스타일 */
+  #rankCard { margin-top: 0; padding: 16px 20px; }
+  #rankCard h2 { font-size: 18px; margin-bottom: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  #rankCard h2::after { content: '🔽'; font-size: 12px; transition: transform 0.3s; }
+  #rankCard.open h2::after { transform: rotate(180deg); }
+
+  /* 미니 랭킹 (접혀있을 때 노출) */
+  .mini-rank { margin-top: 10px; font-size: 14px; color: var(--sub); font-weight: bold; background: rgba(0,0,0,0.03); padding: 6px; border-radius: 8px; }
+  .mini-rank b { color: var(--accent); }
+  .open .mini-rank { display: none; }
+
+  /* 💡 모드별 전용 탭 메뉴 스타일 */
+  .rank-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 14px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   }
+  .rank-tab {
+    flex: 1;
+    padding: 8px 4px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--sub);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .rank-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* 탭 콘텐츠 슬라이드 효과 */
+  .rank-content { 
+    max-height: 0; 
+    overflow: hidden; 
+    transition: max-height 0.3s ease-out, margin-top 0.3s; 
+    opacity: 0;
+  }
+  .open .rank-content { 
+    max-height: 300px; 
+    margin-top: 12px; 
+    opacity: 1;
+  }
+
   .rank-column {
     background: rgba(0, 0, 0, 0.03);
     border-radius: 12px;
     padding: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     text-align: left;
+    display: none; /* 기본 비활성화 */
   }
-  .rank-column h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
-    padding-bottom: 6px;
-    text-align: center;
+  .rank-column.active {
+    display: block; /* 활성화된 것만 표시 */
   }
   .rank-column ol {
     padding-left: 20px;
   }
   .rank-column li {
-    padding: 6px 0;
+    padding: 5px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.08);
     font-size: 13px;
   }
@@ -277,13 +268,6 @@ const CONFIG = {
   }
   .rank-column li b {
     color: var(--accent);
-  }
-
-  /* 모바일 세로 레이아웃 대응 */
-  @media (max-width: 480px) {
-    .rank-grid {
-      grid-template-columns: 1fr;
-    }
   }
   
   footer { margin-top: 22px; color: #475569; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
@@ -318,9 +302,6 @@ const CONFIG = {
 </script>
 </head>
 <body>
-  <div id="hotspot-drum" class="hotspot" title="북을 쳐보세요!" onclick="playEasterEgg('blue', '북🥁')"></div>
-  <div id="hotspot-gong" class="hotspot" title="징을 쳐보세요!" onclick="playEasterEgg('white', '징🔔')"></div>
-
   <div id="speed-popup" class="speed-popup">속도를 원하는 구나? ⚡🏃‍♂️</div>
   <div id="extreme-popup" class="extreme-popup">🚨 익스트림 사이렌 감지! (0.6초 제한) 🚨</div>
 
@@ -337,19 +318,19 @@ const CONFIG = {
     </div>
 
     <div class="flag-container">
-      <div class="flag-pole-wrapper">
+      <div class="flag-pole-wrapper" onclick="playEasterEgg('blue', '북🥁')">
         <div id="egg-blue" class="egg-popup">북</div>
         <div class="flag-pole">
           <div id="flagBlue" class="flag-cloth blue">청기</div>
         </div>
-        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 (W / S)</div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">청기 <span class="key-hint">W 올려</span> <span class="key-hint">S 내려</span></div>
       </div>
-      <div class="flag-pole-wrapper">
+      <div class="flag-pole-wrapper" onclick="playEasterEgg('white', '징🔔')">
         <div id="egg-white" class="egg-popup">징</div>
         <div class="flag-pole">
           <div id="flagWhite" class="flag-cloth white">백기</div>
         </div>
-        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 (▲ / ▼)</div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: bold;">백기 <span class="key-hint">I 올려</span> <span class="key-hint">K 내려</span></div>
       </div>
     </div>
 
@@ -359,8 +340,8 @@ const CONFIG = {
         <button class="control-btn btn-blue" onclick="controlFlag('blue', 'down')">🔵 청기 내려<span class="key-hint">S 키</span></button>
       </div>
       <div class="control-col">
-        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">▲ 키</span></button>
-        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">▼ 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'up')">⚪ 백기 올려<span class="key-hint">I 키</span></button>
+        <button class="control-btn btn-white" onclick="controlFlag('white', 'down')">⚪ 백기 내려<span class="key-hint">K 키</span></button>
       </div>
     </div>
 
@@ -373,14 +354,24 @@ const CONFIG = {
   </div>
 
   <div class="card" id="rankCard">
-    <h2>🏆 실시간 명예의 전당 (성공 횟수 TOP 5)</h2>
-    <div class="rank-grid">
-      <div class="rank-column">
-        <h3>✨ 일반 모드</h3>
-        <ol id="rank"></ol>
+    <h2 onclick="toggleRank()">🏆 명예의 전당</h2>
+    
+    <div id="miniRank" class="mini-rank">로딩 중...</div>
+
+    <div class="rank-tabs">
+      <div id="tab-normal" class="rank-tab active" onclick="switchRankTab('normal')">✨ 기본</div>
+      <div id="tab-hard" class="rank-tab" onclick="switchRankTab('hard')">⚡ 하드</div>
+      <div id="tab-extreme" class="rank-tab" onclick="switchRankTab('extreme')">🚨 익스트림</div>
+    </div>
+
+    <div class="rank-content">
+      <div id="panel-normal" class="rank-column active">
+        <ol id="rankNormal"></ol>
       </div>
-      <div class="rank-column" style="border-color: rgba(239, 68, 68, 0.3);">
-        <h3 style="color: #EF4444;">🚨 익스트림</h3>
+      <div id="panel-hard" class="rank-column">
+        <ol id="rankHard"></ol>
+      </div>
+      <div id="panel-extreme" class="rank-column">
         <ol id="rankExtreme"></ol>
       </div>
     </div>
@@ -439,10 +430,14 @@ const CONFIG = {
   let isSpeedMode = false;
   let isExtremeMode = false; 
 
-  // 💡 기록 등록을 구별하기 위한 현재 세션 게임 모드 저장소
-  let gameModePlayed = "normal";
+  let gameModePlayed = "normal"; // 현재 저장 타겟 모드
+  let activeTab = "normal";      // 현재 화면에 띄우고 있는 랭킹 탭
 
-  // 📝 커맨드 입력을 저장할 감지 장치!
+  // 랭킹 데이터를 실시간으로 보관하는 캐시 (미니 랭킹 1위 판정용)
+  let cachedNormalData = [];
+  let cachedHardData = [];
+  let cachedExtremeData = [];
+
   let cheatInput = [];
   const CHEAT_CODE = ["speed", "blue", "blue", "blue", "white", "white"];
 
@@ -455,53 +450,62 @@ const CONFIG = {
     { text: "백기 내리고 청기 올려!", check: (f) => f.blue === "up" && f.white === "down" }
   ];
 
-  // 스피드 조 클릭 시 커맨드 추적 시작 및 기본 스피드 모드 발동
+  function toggleRank() {
+    const card = document.getElementById('rankCard');
+    card.classList.toggle('open');
+  }
+
+  // 💡 수동으로 탭을 스위칭하는 함수
+  function switchRankTab(mode) {
+    activeTab = mode;
+    
+    // 탭 헤더 활성화 상태 리셋
+    document.querySelectorAll('.rank-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(`tab-${mode}`).classList.add('active');
+    
+    // 탭 콘텐츠 패널 활성화 상태 리셋
+    document.querySelectorAll('.rank-column').forEach(col => col.classList.remove('active'));
+    document.getElementById(`panel-${mode}`).classList.add('active');
+    
+    updateMiniRankText();
+  }
+
   document.getElementById("team-click").addEventListener("click", () => {
     recordCheatStep("speed");
-
     if (isExtremeMode) return; 
-
     isSpeedMode = true; 
+    switchRankTab('hard'); // 💡 하드 모드 랭킹으로 즉시 스위칭!
     const speedPopup = document.getElementById("speed-popup");
     speedPopup.classList.remove("show");
     void speedPopup.offsetWidth; 
     speedPopup.classList.add("show");
-
     if (state === "playing") {
       limitTime = limitTime / 2;
       timeLeft = timeLeft / 2;
     }
   });
 
-  // 커맨드 입력 감지 함수
   function recordCheatStep(step) {
     cheatInput.push(step);
     if (cheatInput.length > CHEAT_CODE.length) {
       cheatInput.shift();
     }
-    // 커맨드가 딱 들어맞았을 때!
     if (JSON.stringify(cheatInput) === JSON.stringify(CHEAT_CODE)) {
       triggerExtremeMode();
     }
   }
 
-  // 🚨 익스트림 모드 가동 연출!
   function triggerExtremeMode() {
     isExtremeMode = true;
     isSpeedMode = false; 
-
-    // 시각 강렬한 변경
+    switchRankTab('extreme'); // 💡 익스트림 모드 랭킹으로 즉시 스위칭!
     document.documentElement.style.setProperty("--accent", "#EF4444"); 
     document.getElementById("title").textContent = "🚨 익스트림 청기백기 🚨";
     document.getElementById("title").style.color = "#EF4444";
     document.getElementById("subtitle").textContent = "⚠️ 제한 시간 0.6초! 당신의 손가락 한계를 시험하세요! ⚠️";
     document.getElementById("subtitle").style.color = "#EF4444";
-
-    // 사이렌 번쩍임 효과 작동
     document.body.style.backgroundImage = "none";
     document.body.style.animation = "extreme-flash 0.5s ease-in-out infinite alternate";
-
-    // 팝업 표시
     const extPopup = document.getElementById("extreme-popup");
     extPopup.classList.add("show");
     setTimeout(() => {
@@ -509,7 +513,6 @@ const CONFIG = {
     }, 2500);
   }
 
-  // 게임오버 후 다시 원래 게임 디자인으로 정화하는 함수
   function restoreNormalMode() {
     isExtremeMode = false;
     document.documentElement.style.setProperty("--accent", CONFIG.accent);
@@ -525,16 +528,12 @@ const CONFIG = {
   }
 
   function playEasterEgg(side, text) {
-    // 커맨드 데이터 전송 (blue 또는 white)
     recordCheatStep(side);
-
     const eggText = document.getElementById(`egg-${side}`);
     eggText.textContent = text;
-    
     eggText.classList.remove("show");
     void eggText.offsetWidth; 
     eggText.classList.add("show");
-
     const flagId = side === "blue" ? "flagBlue" : "flagWhite";
     const flagEl = document.getElementById(flagId);
     flagEl.style.transform = "scale(1.2) rotate(15deg)";
@@ -556,10 +555,8 @@ const CONFIG = {
   function updateFlagGraphics() {
     const flagBlue = document.getElementById("flagBlue");
     const flagWhite = document.getElementById("flagWhite");
-
     if (flags.blue === "up") flagBlue.classList.add("up");
     else flagBlue.classList.remove("up");
-
     if (flags.white === "up") flagWhite.classList.add("up");
     else flagWhite.classList.remove("up");
   }
@@ -573,32 +570,32 @@ const CONFIG = {
   function triggerGameStart() {
     score = 0;
     lives = 3; 
-    
-    // ⚡ 모드별 속도 분기 및 플레이 모드 판정 기록
     if (isExtremeMode) {
-      limitTime = 600; // ⚡ 0.6초 초광속 반응 속도 모드!
+      limitTime = 600; 
       gameModePlayed = "extreme"; 
+      switchRankTab('extreme');
+    } else if (isSpeedMode) {
+      limitTime = initialLimitTime / 2;
+      gameModePlayed = "hard";
+      switchRankTab('hard');
     } else {
-      restoreNormalMode(); // 일반 게임 시작 시 이전에 켜져 있던 테마 원복
-      limitTime = isSpeedMode ? (initialLimitTime / 2) : initialLimitTime;
+      restoreNormalMode(); 
+      limitTime = initialLimitTime;
       gameModePlayed = "normal";
+      switchRankTab('normal');
     }
-    
     flags = { blue: "down", white: "down" };
     updateFlagGraphics();
     updateHeartGraphics();
-    
     result.textContent = "";
     saveBox.style.display = "none";
     timerBar.style.display = "block";
     heartBox.style.display = "block";
-    
     nextRound();
   }
 
   window.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === "INPUT") return;
-
     if (e.key === " ") {
       if (state === "idle" || state === "done") {
         e.preventDefault(); 
@@ -606,32 +603,21 @@ const CONFIG = {
         return;
       }
     }
-
     if (state !== "playing") return;
     
     if (e.key.toLowerCase() === "w") controlFlag("blue", "up");
     if (e.key.toLowerCase() === "s") controlFlag("blue", "down");
-    
-    if (e.key === "ArrowUp") {
-      e.preventDefault(); 
-      controlFlag("white", "up");
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      controlFlag("white", "down");
-    }
+    if (e.key.toLowerCase() === "i") controlFlag("white", "up"); 
+    if (e.key.toLowerCase() === "k") controlFlag("white", "down"); 
   });
 
   function gameLoop(now) {
     if (state !== "playing") return;
-
     const dt = now - lastFrameTime;
     lastFrameTime = now;
     timeLeft -= dt;
-
     const percent = Math.max(0, (timeLeft / limitTime) * 100);
     timerProgress.style.width = percent + "%";
-
     if (timeLeft <= 0) {
       evaluateRound();
     } else {
@@ -649,10 +635,8 @@ const CONFIG = {
     state = "playing";
     arena.className = "";
     setButtonsDisabled(false);
-    
     currentCommand = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
     arena.textContent = currentCommand.text;
-
     timeLeft = limitTime;
     lastFrameTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -661,18 +645,14 @@ const CONFIG = {
   function evaluateRound() {
     cancelAnimationFrame(animationFrameId);
     setButtonsDisabled(true);
-
     const isCorrect = currentCommand.check(flags);
-
     if (isCorrect) {
       score++;
       state = "feedback";
       arena.className = "go";
       arena.textContent = "성공! 🎉";
       result.textContent = score + " 회 돌파!";
-      
       setTimeout(() => {
-        // 익스트림 모드일 땐 줄어드는 최소 시간을 150ms 수준으로 세팅하여 폭발적인 스피드 조율
         const minTime = isExtremeMode ? 150 : (isSpeedMode ? 400 : 800);
         limitTime = Math.max(minTime, limitTime - (isExtremeMode ? 25 : 120)); 
         nextRound();
@@ -680,12 +660,10 @@ const CONFIG = {
     } else {
       lives--;
       updateHeartGraphics();
-
       if (lives > 0) {
         state = "feedback";
         arena.className = "wait";
         arena.textContent = "아차! 기회 감점! 😢";
-        
         setTimeout(() => {
           nextRound();
         }, 800);
@@ -694,82 +672,146 @@ const CONFIG = {
         timerBar.style.display = "none";
         arena.className = "wait";
         arena.textContent = "게임 오버! 다시 시작 (클릭/스페이스바)";
-        result.textContent = `최종 점수: ${score}회 성공 (${gameModePlayed === 'extreme' ? '🔥익스트림' : '일반'})`;
         
+        let modeLabel = "기본";
+        if (gameModePlayed === "hard") modeLabel = "⚡하드";
+        if (gameModePlayed === "extreme") modeLabel = "🔥익스트림";
+        
+        result.textContent = `최종 점수: ${score}회 성공 (${modeLabel})`;
         lastScore = score;
         saveBox.style.display = "block";
-        
         isSpeedMode = false;
-        cheatInput = []; // 치트 입력 초기화
+        cheatInput = []; 
       }
     }
   }
 
-  // 🏆 [수정] 양쪽 랭킹 데이터를 병렬로 불러와 화면에 꽂아주는 함수
+  // 💡 3가지 모드별 데이터 동적 불러오기 로직
   async function renderRank() {
-    const rankList = document.getElementById("rank");
+    const rankNormalList = document.getElementById("rankNormal");
+    const rankHardList = document.getElementById("rankHard");
     const rankExtremeList = document.getElementById("rankExtreme");
     
     if (!supabaseClient) {
-      rankList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
-      rankExtremeList.innerHTML = "<li>💻 로컬 플레이 모드 실행 중</li>";
+      const msg = "<li>💻 로컬 플레이 모드</li>";
+      rankNormalList.innerHTML = msg;
+      rankHardList.innerHTML = msg;
+      rankExtremeList.innerHTML = msg;
+      updateMiniRankText();
       return;
     }
 
     try {
-      // 일반 모드와 익스트림 모드 테이블을 동시 비동기 호출!
-      const [normalRes, extremeRes] = await Promise.all([
-        supabaseClient.from('rankings').select('name, score').order('score', { ascending: false }).limit(5),
-        supabaseClient.from('rankings_extreme').select('name, score').order('score', { ascending: false }).limit(5)
+      // 테이블이 존재하지 않을 상황을 고려한 안전 조회 함수
+      const fetchSafeTable = async (tableName) => {
+        try {
+          const { data, error } = await supabaseClient
+            .from(tableName)
+            .select('name, score')
+            .order('score', { ascending: false })
+            .limit(5);
+          if (error) throw error;
+          return data || [];
+        } catch (e) {
+          console.warn(`${tableName} 테이블을 찾을 수 없거나 불러오기에 실패했습니다.`, e);
+          return [];
+        }
+      };
+
+      const [normalData, extremeData, hardData] = await Promise.all([
+        fetchSafeTable('rankings'),
+        fetchSafeTable('rankings_extreme'),
+        fetchSafeTable('rankings_hard') // 💡 신규 생성할 하드 전용 테이블
       ]);
 
-      if (normalRes.error) throw normalRes.error;
-      if (extremeRes.error) throw extremeRes.error;
+      cachedNormalData = normalData;
+      cachedExtremeData = extremeData;
+      cachedHardData = hardData;
 
-      // 1. 일반 모드 랭킹 바인딩
-      rankList.innerHTML = normalRes.data.length 
-        ? normalRes.data.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
+      rankNormalList.innerHTML = normalData.length 
+        ? normalData.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
         : "<li>기록이 없습니다.</li>";
 
-      // 2. 익스트림 모드 랭킹 바인딩
-      rankExtremeList.innerHTML = extremeRes.data.length 
-        ? extremeRes.data.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
+      rankExtremeList.innerHTML = extremeData.length 
+        ? extremeData.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
         : "<li>기록이 없습니다.</li>";
+
+      // 만약 rankings_hard가 존재하지 않는 경우 가이드 문구 노출
+      rankHardList.innerHTML = hardData.length 
+        ? hardData.map(r => `<li><b>${r.score} 회</b> — ${escapeHtml(r.name)}</li>`).join("")
+        : "<li>기록이 없거나 테이블이 미설정되었습니다.</li>";
+
+      updateMiniRankText();
 
     } catch (err) {
       console.error("랭킹 불러오기 실패:", err);
-      rankList.innerHTML = "<li>⚠️ 로드 실패</li>";
-      rankExtremeList.innerHTML = "<li>⚠️ 로드 실패</li>";
+      const msg = "<li>⚠️ 로드 실패</li>";
+      rankNormalList.innerHTML = msg;
+      rankHardList.innerHTML = msg;
+      rankExtremeList.innerHTML = msg;
     }
   }
 
-  // 🏆 [수정] 현재 모드(gameModePlayed) 판정 후 알맞은 테이블에 저장하는 함수
+  // 💡 선택된 탭에 매핑된 미니 랭킹 1위 정보 표시
+  function updateMiniRankText() {
+    const miniRank = document.getElementById("miniRank");
+    let targetData = cachedNormalData;
+    let modeTitle = "기본";
+
+    if (activeTab === "hard") {
+      targetData = cachedHardData;
+      modeTitle = "하드";
+    } else if (activeTab === "extreme") {
+      targetData = cachedExtremeData;
+      modeTitle = "익스트림";
+    }
+
+    if (targetData && targetData.length > 0) {
+      miniRank.innerHTML = `[${modeTitle} 1등] <b>${targetData[0].score}회</b> (${escapeHtml(targetData[0].name)})`;
+    } else {
+      miniRank.innerHTML = `현재 [${modeTitle}] 모드에 등록된 기록이 없습니다.`;
+    }
+  }
+
   async function saveScore() {
     const nameInput = document.getElementById("name");
     const saveBtn = document.getElementById("saveBtn");
     const name = nameInput.value.trim() || "익명";
-    
     if (!supabaseClient) return;
-
     try {
       saveBtn.disabled = true;
       saveBtn.textContent = "등록 중...";
-
-      // 익스트림 상태였다면 rankings_extreme에, 아니면 일반 rankings에 등록!
-      const targetTable = (gameModePlayed === "extreme") ? 'rankings_extreme' : 'rankings';
+      
+      let targetTable = 'rankings';
+      if (gameModePlayed === "extreme") targetTable = 'rankings_extreme';
+      if (gameModePlayed === "hard") targetTable = 'rankings_hard';
 
       const { error } = await supabaseClient
         .from(targetTable) 
         .insert([{ name, score: lastScore }]);
 
-      if (error) throw error;
+      if (error) {
+        // 💡 안전장치: rankings_hard 테이블이 없는 경우 일반 테이블에 (하드) 명칭을 달아서 저장 시켜 뻗지 않게 조치
+        if (gameModePlayed === "hard") {
+          console.warn("rankings_hard 테이블이 확인되지 않아 rankings(기본) 테이블로 우회 등록합니다.");
+          await supabaseClient.from('rankings').insert([{ name: `${name} (하드)`, score: lastScore }]);
+        } else {
+          throw error;
+        }
+      }
 
       saveBox.style.display = "none";
       nameInput.value = "";
       await renderRank(); 
+      
+      // 💡 저장 후에는 본인이 플레이했던 그 모드의 탭을 강제 활성화 시켜 바로 등재 확인 가능케 함
+      switchRankTab(gameModePlayed);
+      if (!document.getElementById('rankCard').classList.contains('open')) {
+        toggleRank();
+      }
     } catch (err) {
       console.error("점수 등록 실패:", err);
-      alert("데이터 전송 실패! 테이블 생성 유무를 확인하세요.");
+      alert("데이터 전송 실패!");
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = "랭킹 등록";
